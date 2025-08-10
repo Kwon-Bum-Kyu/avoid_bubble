@@ -46,3 +46,6 @@ app.*.map.json
 
 *.local.md
 *.local.json
+
+# 기획용 md
+game_plan_analysis.md

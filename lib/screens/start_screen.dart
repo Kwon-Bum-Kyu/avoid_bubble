@@ -39,7 +39,7 @@ class StartScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Main content
             Expanded(
               child: Center(
@@ -47,7 +47,7 @@ class StartScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      'AVOID BUBBLE',
+                      '어보이드 버블',
                       style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
@@ -64,13 +64,10 @@ class StartScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     const Text(
                       '탄막을 피해 최대한 오래 생존하세요!',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 18, color: Colors.white70),
                     ),
                     const SizedBox(height: 40),
-                    
+
                     // Stats display
                     if (stats.totalGamesPlayed > 0)
                       Container(
@@ -108,13 +105,16 @@ class StartScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                    
+
                     ElevatedButton(
                       onPressed: onStartGame,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4CAF50),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 15,
+                        ),
                         textStyle: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -125,10 +125,7 @@ class StartScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     const Text(
                       '조작법: WASD 또는 방향키로 이동',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white60,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.white60),
                     ),
                   ],
                 ),

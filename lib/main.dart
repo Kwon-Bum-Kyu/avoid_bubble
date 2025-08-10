@@ -19,10 +19,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Avoid Bubble Game',
-      theme: ThemeData(
-        fontFamily: 'NexonCart',
-      ),
+      title: '어보이드 버블',
+      theme: ThemeData(fontFamily: 'NexonCart'),
       home: const GameWrapper(),
       debugShowCheckedModeBanner: false,
     );
@@ -40,7 +38,7 @@ class GameWrapperState extends State<GameWrapper> {
   GameState _currentState = GameState.startScreen;
   late AvoidBubbleGame game;
   GameSettings _settings = GameSettings.defaultSettings();
-  GameStats _stats = GameStats();
+  final GameStats _stats = GameStats();
 
   @override
   void initState() {
@@ -187,7 +185,7 @@ class GameScreenState extends State<GameScreen> {
     if (_keysPressed.contains(LogicalKeyboardKey.keyR)) {
       widget.game.tryRestart();
     }
-    
+
     if (_keysPressed.contains(LogicalKeyboardKey.escape)) {
       widget.onBackToStart();
     }
@@ -271,7 +269,6 @@ class GameScreenState extends State<GameScreen> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
-                      print('🏠 Home button pressed - returning to start screen');
                       widget.onBackToStart();
                     },
                     borderRadius: BorderRadius.circular(25),
