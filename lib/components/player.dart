@@ -1,116 +1,102 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:math';
 import '../game/avoid_bubble_game.dart';
+import '../models/player_model.dart';
 import 'bullet.dart';
 
-class Player extends RectangleComponent with KeyboardHandler {
-  static const double speed = 200.0;
-  late Vector2 velocity;
+// Player 클래스는 SpriteAnimationComponent를 상속받아 애니메이션을 처리합니다.
+class Player extends SpriteAnimationComponent
+    with HasGameReference<AvoidBubbleGame> {
+  // 플레이어의 데이터와 로직을 관리하는 모델
+  late PlayerModel model;
+  // 걷기, 멈춤 애니메이션
+  late SpriteAnimation _walkAnimation;
+  late SpriteAnimation _idleAnimation;
 
-  Player()
-    : super(
-        size: Vector2(40, 40),
-        paint: Paint()..color = const Color(0xFF4FC3F7),
-      );
+  // 생성자: 플레이어의 속도와 크기를 초기화합니다.
+  Player({double speed = 200.0}) {
+    model = PlayerModel(speed: speed, size: Vector2(48, 48));
+  }
 
   @override
   Future<void> onLoad() async {
-    velocity = Vector2.zero();
-    final game = parent! as AvoidBubbleGame;
-    position = Vector2(
-      (game.size.x / 2) - (size.x / 2), // 화면 중앙 가로
-      (game.size.y / 2) - (size.y / 2), // 화면 중앙 세로
-    );
+    await super.onLoad();
 
-    print('Player loaded at center and ready for keyboard input!');
+    // 스프라이트 시트 이미지 로드
+    final spriteImage = await game.images.load('fire_char_walk.png');
+
+    // 걷기 애니메이션 데이터 생성
+    final walkData = SpriteAnimationData.sequenced(
+      amount: 8,
+      stepTime: 0.08,
+      textureSize: Vector2(24, 24), // 각 프레임의 텍스처 크기
+    );
+    _walkAnimation = SpriteAnimation.fromFrameData(spriteImage, walkData);
+
+    // 정지 상태 애니메이션 데이터 생성 첫 번째 프레임만 사용
+    final idleData = SpriteAnimationData.sequenced(
+      amount: 1, // 1개의 프레임
+      stepTime: 1, // 단일 프레임이므로 의미 없음
+      textureSize: Vector2(24, 24),
+    );
+    _idleAnimation = SpriteAnimation.fromFrameData(spriteImage, idleData);
+
+    // 초기 애니메이션은 정지 상태로 설정
+    animation = _idleAnimation;
+
+    // 컴포넌트의 크기와 위치 설정
+    size = model.size;
+    model.resetToCenter(game.size);
+    position = model.position;
+    anchor = Anchor.center; // 앵커를 중심으로 설정하여 위치를 정확하게 맞춤
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-
-    // Apply velocity
-    position += velocity * dt;
-
-    // Keep player within screen bounds
-    final game = parent! as AvoidBubbleGame;
-    position.x = position.x.clamp(0, game.size.x - size.x);
-    position.y = position.y.clamp(0, game.size.y - size.y);
+    // 모델의 위치를 업데이트하고 컴포넌트 위치와 동기화
+    model.updatePosition(dt, game.size);
+    position = model.position;
   }
 
-  @override
-  bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    final game = parent! as AvoidBubbleGame;
-
-    // Handle restart
-    if (keysPressed.contains(LogicalKeyboardKey.keyR) && game.isGameOver) {
-      game.restart();
-      return true;
-    }
-
-    // Don't move if game is over
-    if (game.isGameOver) {
-      velocity.setZero();
-      return true;
-    }
-
-    velocity.setZero();
-
-    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft) ||
-        keysPressed.contains(LogicalKeyboardKey.keyA)) {
-      velocity.x = -speed;
-    }
-    if (keysPressed.contains(LogicalKeyboardKey.arrowRight) ||
-        keysPressed.contains(LogicalKeyboardKey.keyD)) {
-      velocity.x = speed;
-    }
-    if (keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
-        keysPressed.contains(LogicalKeyboardKey.keyW)) {
-      velocity.y = -speed;
-    }
-    if (keysPressed.contains(LogicalKeyboardKey.arrowDown) ||
-        keysPressed.contains(LogicalKeyboardKey.keyS)) {
-      velocity.y = speed;
-    }
-
-    return true;
-  }
-
+  // 외부에서 플레이어의 움직임을 설정하는 메서드
   void setMovement(double x, double y) {
-    velocity.setValues(x * speed, y * speed);
+    model.setMovement(x, y);
+    // 움직임 여부에 따라 애니메이션을 변경
+    if (x != 0 || y != 0) {
+      animation = _walkAnimation; // 움직이면 걷기 애니메이션
+    } else {
+      animation = _idleAnimation; // 멈추면 정지 애니메이션
+    }
   }
 
+  // 플레이어를 화면 중앙으로 리셋
+  void resetToCenter() {
+    model.resetToCenter(game.size);
+    position = model.position;
+  }
+
+  // 플레이어의 중심 좌표와 반지름 getter
+  Vector2 get playerCenter => position;
+  double get playerRadius => size.x / 2;
+
+  // 총알과의 충돌을 확인하는 로직
   void checkCollisions() {
-    final game = parent! as AvoidBubbleGame;
     final bullets = game.children.whereType<Bullet>();
 
-    // 무적 모드 상태 확인
-    if (bullets.isNotEmpty) {
-      print('🔍 Checking collisions - Invincible mode: ${game.isInvincible}, Bullets: ${bullets.length}');
-    }
-
-    for (final bullet in bullets) {
-      // Check if bullet center is within player bounds
-      final playerCenter = Vector2(
-        position.x + size.x / 2,
-        position.y + size.y / 2,
-      );
-      final bulletCenter = Vector2(bullet.position.x, bullet.position.y);
-      final distance = playerCenter.distanceTo(bulletCenter);
-      final collisionDistance = (size.x / 2) + bullet.radius;
-      
-      if (distance < collisionDistance) {
-        print('⚠️  COLLISION DISTANCE: ${distance.toStringAsFixed(2)} < ${collisionDistance.toStringAsFixed(2)}');
-        print('🛡️  Invincible status: ${game.isInvincible}');
-        
-        if (game.isInvincible) {
-          print('💀 COLLISION DETECTED but invincible mode is ON at ${game.survivalTime.toStringAsFixed(1)}s');
-          // 무적 모드에서는 총알을 제거하고 계속 진행
+    // 무적 모드
+    if (game.isInvincible) {
+      for (final bullet in bullets) {
+        // 충돌한 총알을 제거
+        if (position.distanceTo(bullet.position) <
+            playerRadius + bullet.radius) {
           bullet.removeFromParent();
-        } else {
-          print('COLLISION! Player hit at ${game.survivalTime.toStringAsFixed(1)}s');
+        }
+      }
+    } else {
+      // 무적 모드 X
+      for (final bullet in bullets) {
+        if (position.distanceTo(bullet.position) <
+            playerRadius + bullet.radius) {
           game.gameOver();
           break;
         }

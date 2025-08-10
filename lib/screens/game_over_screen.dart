@@ -44,13 +44,9 @@ class GameOverScreen extends StatelessWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF1A1A2E),
-            Color(0xFF0F0F1E),
-          ],
+        image: DecorationImage(
+          image: AssetImage('assets/images/background.png'),
+          fit: BoxFit.cover,
         ),
       ),
       child: Center(

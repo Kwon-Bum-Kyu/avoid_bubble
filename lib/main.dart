@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/avoid_bubble_game.dart';
 import 'game/game_state.dart';
+import 'models/game_settings.dart';
+import 'models/game_stats.dart';
 import 'screens/start_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
 
 void main() {
@@ -17,6 +20,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Avoid Bubble Game',
+      theme: ThemeData(
+        fontFamily: 'NexonCart',
+      ),
       home: const GameWrapper(),
       debugShowCheckedModeBanner: false,
     );
@@ -33,6 +39,8 @@ class GameWrapper extends StatefulWidget {
 class GameWrapperState extends State<GameWrapper> {
   GameState _currentState = GameState.startScreen;
   late AvoidBubbleGame game;
+  GameSettings _settings = GameSettings.defaultSettings();
+  GameStats _stats = GameStats();
 
   @override
   void initState() {
@@ -41,7 +49,7 @@ class GameWrapperState extends State<GameWrapper> {
   }
 
   void _createNewGame() {
-    game = AvoidBubbleGame();
+    game = AvoidBubbleGame(settings: _settings);
     game.onGameOver = _showGameOver;
   }
 
@@ -64,6 +72,19 @@ class GameWrapperState extends State<GameWrapper> {
     });
   }
 
+  void _showSettings() {
+    setState(() {
+      _currentState = GameState.settings;
+    });
+  }
+
+  void _updateSettings(GameSettings newSettings) {
+    setState(() {
+      _settings = newSettings;
+      _createNewGame(); // Recreate game with new settings
+    });
+  }
+
   void _backToStart() {
     setState(() {
       _currentState = GameState.startScreen;
@@ -75,7 +96,17 @@ class GameWrapperState extends State<GameWrapper> {
   Widget build(BuildContext context) {
     switch (_currentState) {
       case GameState.startScreen:
-        return StartScreen(onStartGame: _startGame);
+        return StartScreen(
+          onStartGame: _startGame,
+          onShowSettings: _showSettings,
+          stats: _stats,
+        );
+      case GameState.settings:
+        return SettingsScreen(
+          settings: _settings,
+          onSettingsChanged: _updateSettings,
+          onBack: _backToStart,
+        );
       case GameState.playing:
         return GameScreen(game: game, onBackToStart: _backToStart);
       case GameState.gameOver:

@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../components/player.dart';
 import '../components/bullet.dart';
+import '../models/game_settings.dart';
+import '../models/bullet_model.dart';
 
 class AvoidBubbleGame extends FlameGame {
+  final GameSettings settings;
   late Player player;
   late TextComponent timeText;
   double spawnRate = 1.0; // bullets per second
@@ -13,28 +16,31 @@ class AvoidBubbleGame extends FlameGame {
   double lastBulletSpawn = -1.0; // -1로 시작하여 2초에 첫 총알이 확실히 나오도록
   double lastPattern2Spawn = 0.0; // 8방향 패턴
   double lastPattern3Spawn = 0.0; // 일직선 패턴
+  int pattern3Direction = 0; // 패턴 3 방향 순서 (0: 위, 1: 아래, 2: 왼쪽, 3: 오른쪽)
   bool isGameOver = false;
   final Random random = Random();
   VoidCallback? onGameOver;
 
-  // 로컬 테스트용 무적 모드
-  bool get isInvincible => true; // 로컬에서는 무적
+  AvoidBubbleGame({required this.settings});
+
+  bool get isInvincible => settings.isInvincible;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Add background color
+    // Add background image
+    final background = await Sprite.load('background.png');
     add(
-      RectangleComponent(
+      SpriteComponent(
+        sprite: background,
         size: size,
-        paint: Paint()..color = const Color(0xFF1A1A2E),
-        priority: 0,
-      ),
+        anchor: Anchor.topLeft,
+      )..priority = 0,
     );
 
     // Add player
-    player = Player();
+    player = Player(speed: settings.playerSpeed);
     add(player..priority = 1);
 
     // Add survival time display
@@ -42,23 +48,29 @@ class AvoidBubbleGame extends FlameGame {
       text: 'Time: 0.0s',
       position: Vector2(20, 50),
       textRenderer: TextPaint(
-        style: const TextStyle(color: Colors.white, fontSize: 24),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontFamily: 'NexonCart',
+          shadows: [
+            Shadow(
+              offset: Offset(1, 1),
+              blurRadius: 2,
+              color: Color(0x80000000),
+            ),
+          ],
+        ),
       ),
     );
     add(timeText..priority = 2);
 
-    print('Game initialized - ready to spawn bullets!');
   }
 
   void spawnBullet() {
-    print('Spawning bullet...');
-
     // Choose random side (0=top, 1=right, 2=bottom, 3=left)
     final side = random.nextInt(4);
     late Vector2 startPosition;
     late Vector2 direction;
-
-    print('Spawn side: $side');
 
     switch (side) {
       case 0: // Top
@@ -91,19 +103,17 @@ class AvoidBubbleGame extends FlameGame {
         break;
     }
 
-    final bullet = Bullet(startPosition: startPosition, direction: direction);
+    final bullet = Bullet(
+      startPosition: startPosition,
+      direction: direction,
+      speed: settings.bulletSpeed,
+    );
     bullet.priority = 1;
     add(bullet);
-
-    print('Bullet created at: $startPosition, direction: $direction');
   }
 
   // 패턴 1: 플레이어 위치로 날아오는 탄막 (2-15초)
   void spawnTargetedBullet() {
-    print(
-      '=== PATTERN 1: Targeted Bullet at ${survivalTime.toStringAsFixed(1)}s ===',
-    );
-
     // 맵 밖 화면 가장자리에서 시작
     final side = random.nextInt(4);
     late Vector2 startPosition;
@@ -123,118 +133,170 @@ class AvoidBubbleGame extends FlameGame {
         break;
     }
 
-    // 플레이어 중심점 계산
-    final playerCenter = Vector2(
-      player.position.x + player.size.x / 2,
-      player.position.y + player.size.y / 2,
-    );
-
-    // 플레이어 방향으로 향하는 정규화된 방향 벡터
+    final playerCenter = player.playerCenter;
     final direction = (playerCenter - startPosition).normalized();
 
-    final bullet = Bullet(startPosition: startPosition, direction: direction);
+    final bullet = Bullet(
+      startPosition: startPosition,
+      direction: direction,
+      speed: settings.bulletSpeed,
+      type: BulletType.targeted,
+    );
     bullet.priority = 1;
     add(bullet);
-
-    print(
-      'Bullet spawned from outside map: ${startPosition.toString()} -> player at: ${playerCenter.toString()}',
-    );
   }
 
   // 패턴 2: 8방향에서 플레이어로 날아오는 탄막 (15초부터 5초마다)
   void spawnEightDirectionBullets() {
-    print('=== PATTERN 2: Eight Direction Bullets ===');
+    final playerCenter = player.playerCenter;
 
-    final playerCenter = Vector2(
-      player.position.x + player.size.x / 2,
-      player.position.y + player.size.y / 2,
-    );
-
-    // 8방향에서 탄막 생성
+    // 8개의 정규화된 방향 벡터
     final directions = [
-      Vector2(0, -1), // 위
-      Vector2(1, -1), // 우상
-      Vector2(1, 0), // 우
-      Vector2(1, 1), // 우하
-      Vector2(0, 1), // 하
-      Vector2(-1, 1), // 좌하
-      Vector2(-1, 0), // 좌
-      Vector2(-1, -1), // 좌상
+      Vector2(0, -1), // N
+      Vector2(1, -1)..normalize(), // NE
+      Vector2(1, 0), // E
+      Vector2(1, 1)..normalize(), // SE
+      Vector2(0, 1), // S
+      Vector2(-1, 1)..normalize(), // SW
+      Vector2(-1, 0), // W
+      Vector2(-1, -1)..normalize(), // NW
     ];
 
-    for (int i = 0; i < directions.length; i++) {
-      final dir = directions[i];
-      // 플레이어에서 충분히 멀리 떨어진 곳에서 시작 (맵 밖)
-      final startPosition = playerCenter + (dir * -300);
+    // 화면 대각선 길이를 기반으로 한 일관된 생성 거리
+    final safeDistance = size.length / 2 + 50; // 화면 대각선의 절반 + 여유 거리
 
-      // 플레이어 방향으로 향하는 정규화된 벡터
+    for (final dir in directions) {
+      // 플레이어의 반대 방향 멀리서 시작
+      final startPosition = playerCenter - (dir * safeDistance);
+
+      // 시작점에서 플레이어를 향하는 방향
       final targetDirection = (playerCenter - startPosition).normalized();
 
       add(
-        Bullet(startPosition: startPosition, direction: targetDirection)
-          ..priority = 1,
+        Bullet(
+          startPosition: startPosition,
+          direction: targetDirection,
+          speed: settings.bulletSpeed,
+          type: BulletType.directional,
+        )..priority = 1,
       );
     }
-
-    print('8-direction bullets spawned targeting: $playerCenter');
   }
 
-  // 패턴 3: 바닥에서 위로 일직선 탄막 8개 (30초부터 10초마다)
+  // 패턴 3: 상하좌우 순서대로 한 방향에서 일직선 탄막 8개
   void spawnLinearBullets() {
-    print('=== PATTERN 3: Linear Bullets ===');
-
     final bulletCount = 8;
-    final spacing = size.x / (bulletCount + 1); // 간격을 더 넓게
+    final direction = pattern3Direction; // 순서대로 방향 변경
 
-    for (int i = 1; i <= bulletCount; i++) {
-      final startPosition = Vector2(
-        spacing * i,
-        size.y - 10,
-      ); // 화면 아래쪽 가장자리에서 시작
-      final direction = Vector2(0, -1).normalized(); // 위쪽 방향 (정규화)
+    late Vector2 startPos;
+    late Vector2 directionVector;
+    late double spacing;
 
-      final bullet = Bullet(startPosition: startPosition, direction: direction);
-      bullet.priority = 1;
-      add(bullet);
-      
-      print('📍 Pattern 3 bullet $i: pos=${startPosition.toString()}, dir=${direction.toString()}, vel will be ${(direction * 80).toString()}');
+    switch (direction) {
+      case 0: // 위에서 아래로
+        spacing = size.x / (bulletCount + 1);
+        for (int i = 1; i <= bulletCount; i++) {
+          startPos = Vector2(spacing * i, -10);
+          directionVector = Vector2(0, 1).normalized();
+
+          final bullet = Bullet(
+            startPosition: startPos,
+            direction: directionVector,
+            speed: settings.bulletSpeed,
+            type: BulletType.linear,
+          );
+          bullet.priority = 1;
+          add(bullet);
+        }
+        break;
+
+      case 1: // 오른쪽에서 왼쪽으로
+        spacing = size.y / (bulletCount + 1);
+        for (int i = 1; i <= bulletCount; i++) {
+          startPos = Vector2(size.x + 10, spacing * i);
+          directionVector = Vector2(-1, 0).normalized();
+
+          final bullet = Bullet(
+            startPosition: startPos,
+            direction: directionVector,
+            speed: settings.bulletSpeed,
+            type: BulletType.linear,
+          );
+          bullet.priority = 1;
+          add(bullet);
+        }
+        break;
+
+      case 2: // 아래에서 위로
+        spacing = size.x / (bulletCount + 1);
+        for (int i = 1; i <= bulletCount; i++) {
+          startPos = Vector2(spacing * i, size.y + 10);
+          directionVector = Vector2(0, -1).normalized();
+
+          final bullet = Bullet(
+            startPosition: startPos,
+            direction: directionVector,
+            speed: settings.bulletSpeed,
+            type: BulletType.linear,
+          );
+          bullet.priority = 1;
+          add(bullet);
+        }
+        break;
+
+      case 3: // 왼쪽에서 오른쪽으로
+        spacing = size.y / (bulletCount + 1);
+        for (int i = 1; i <= bulletCount; i++) {
+          startPos = Vector2(-10, spacing * i);
+          directionVector = Vector2(1, 0).normalized();
+
+          final bullet = Bullet(
+            startPosition: startPos,
+            direction: directionVector,
+            speed: settings.bulletSpeed,
+            type: BulletType.linear,
+          );
+          bullet.priority = 1;
+          add(bullet);
+        }
+        break;
     }
 
-    print('Linear bullets: $bulletCount bullets from bottom to top, spacing: ${spacing.toStringAsFixed(1)}');
+    // 다음 발동을 위해 방향 순서 변경 (0: 위 → 1: 아래 → 2: 왼쪽 → 3: 오른쪽 → 0: 위)
+    pattern3Direction = (pattern3Direction + 1) % 4;
   }
 
   void _handleBulletPatterns() {
-    // 패턴 1: 2초~15초 - 플레이어를 향한 탄막 (1초마다)
-    if (survivalTime >= 2.0 && survivalTime < 15.0) {
-      if (survivalTime - lastBulletSpawn >= 1.0) {
-        print(
-          '*** PATTERN 1: Spawning targeted bullet at ${survivalTime.toStringAsFixed(2)}s ***',
-        );
+    final timings = settings.patternTimings;
+
+    // 패턴 1: 설정된 시간부터 시작 - 플레이어를 향한 탄막
+    if (survivalTime >= timings.pattern1StartTime &&
+        survivalTime < timings.pattern1EndTime) {
+      if (survivalTime - lastBulletSpawn >= timings.pattern1Interval) {
         spawnTargetedBullet();
         lastBulletSpawn = survivalTime;
       }
     }
 
-    // 패턴 2: 15초부터 - 8방향 탄막 (5초마다)
-    if (survivalTime >= 15.0) {
-      if (survivalTime - lastPattern2Spawn >= 5.0) {
+    // 패턴 2: 설정된 시간부터 - 8방향 탄막
+    if (survivalTime >= timings.pattern2StartTime) {
+      if (survivalTime - lastPattern2Spawn >= timings.pattern2Interval) {
         spawnEightDirectionBullets();
         lastPattern2Spawn = survivalTime;
       }
     }
 
-    // 패턴 3: 20초부터 - 일직선 탄막 (8초마다)
-    if (survivalTime >= 20.0) {
-      if (survivalTime - lastPattern3Spawn >= 8.0) {
-        print('🎯 Pattern 3 triggered at ${survivalTime.toStringAsFixed(1)}s (last: ${lastPattern3Spawn.toStringAsFixed(1)}s)');
+    // 패턴 3: 설정된 시간부터 - 일직선 탄막
+    if (survivalTime >= timings.pattern3StartTime) {
+      if (survivalTime - lastPattern3Spawn >= timings.pattern3Interval) {
         spawnLinearBullets();
         lastPattern3Spawn = survivalTime;
       }
     }
 
-    // 15초 이후에는 패턴 1도 계속 진행 (더 빠르게)
-    if (survivalTime >= 15.0) {
-      if (survivalTime - lastBulletSpawn >= 0.8) {
+    // 패턴 1 종료 후에는 더 빠른 주기로 계속 진행
+    if (survivalTime >= timings.pattern1EndTime) {
+      if (survivalTime - lastBulletSpawn >= timings.pattern1FastInterval) {
         spawnTargetedBullet();
         lastBulletSpawn = survivalTime;
       }
@@ -246,23 +308,13 @@ class AvoidBubbleGame extends FlameGame {
     super.update(dt);
 
     if (!isGameOver) {
-      // Update survival time
       survivalTime += dt;
       timeText.text = 'Time: ${survivalTime.toStringAsFixed(1)}s';
 
-      // Check collisions
       player.checkCollisions();
 
       // 패턴별 탄막 스폰 로직
       _handleBulletPatterns();
-
-      // Debug: print bullet count every 2 seconds
-      if (survivalTime % 2.0 < 0.1) {
-        final bulletCount = children.whereType<Bullet>().length;
-        print(
-          'Bullets in game: $bulletCount, spawn rate: ${spawnRate.toStringAsFixed(2)}',
-        );
-      }
     }
   }
 
@@ -270,33 +322,24 @@ class AvoidBubbleGame extends FlameGame {
     if (isGameOver) return;
 
     isGameOver = true;
-    print(
-      'Game Over! Final survival time: ${survivalTime.toStringAsFixed(1)}s',
-    );
 
-    // Call the game over callback
     onGameOver?.call();
   }
 
   void restart() {
-    // Remove all bullets
+    // 총알 초기화
     children.whereType<Bullet>().forEach((bullet) => bullet.removeFromParent());
 
-    // Reset game state
+    // 게임 스텟 초기화
     isGameOver = false;
     survivalTime = 0.0;
     lastBulletSpawn = -1.0; // 이전 값을 -1로 설정하여 2초에 첫 총알이 나오도록 보장
     lastPattern2Spawn = 0.0;
     lastPattern3Spawn = 0.0;
+    pattern3Direction = 0; // 패턴 3 방향 순서 리셋
     spawnRate = 1.0;
 
-    print('Game restarted! lastBulletSpawn reset to -1.0');
-
-    // Reset player position to center
-    player.position = Vector2(
-      (size.x / 2) - (player.size.x / 2),
-      (size.y / 2) - (player.size.y / 2),
-    );
+    player.resetToCenter();
   }
 
   void setPlayerMovement(double x, double y) {

@@ -1,75 +1,51 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 import '../game/avoid_bubble_game.dart';
+import '../models/bullet_model.dart';
 
-class Bullet extends CircleComponent {
-  static const double speed = 80.0; // 더 느리게 해서 확실히 보이게
-  late Vector2 velocity;
+class Bullet extends SpriteComponent with HasGameReference<AvoidBubbleGame> {
+  late BulletModel model;
 
-  Bullet({required Vector2 startPosition, required Vector2 direction})
-    : super(
-        radius: 30.0, // 훨씬 크게 만들어서 확실히 보이게
-        paint: Paint()..color = const Color(0xFFFF0000), // 밝은 순수 빨간색
-      ) {
-    position = startPosition;
-    
-    // 0벡터가 아닐 때만 정규화
-    if (direction.length > 0) {
-      velocity = direction.normalized() * speed;
-    } else {
-      velocity = Vector2.zero(); // 정지된 불렛
-    }
-    
-    print('🔴 BULLET CREATED: pos=$position, vel=$velocity, radius=$radius, speed=$speed');
+  // 총알의 시작 위치, 방향, 속도, 타입(패턴)
+  Bullet({
+    required Vector2 startPosition,
+    required Vector2 direction,
+    required double speed,
+    BulletType type = BulletType.targeted,
+  }) {
+    model = BulletModel(
+      startPosition: startPosition,
+      direction: direction,
+      speed: speed,
+      radius: 24.0, // 모델의 충돌 반경을 24로 고정
+      type: type,
+    );
+    // 모델의 위치와 크기를 기반으로 컴포넌트의 위치와 크기를 설정
+    position = model.position;
+    size = Vector2.all(model.radius * 2); // 스프라이트 크기를 모델 반경의 2배로 설정
+    anchor = Anchor.center; // 앵커를 중심으로 설정
   }
 
   @override
   Future<void> onLoad() async {
-    super.onLoad();
-    print('🎯 BULLET LOADED: pos=$position, size=${size.toString()}, visible=true');
-  }
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    // Removed excessive logging
+    await super.onLoad();
+    // 총알 스프라이트 이미지 로드
+    sprite = await game.loadSprite('bullet.png');
   }
 
   @override
   void update(double dt) {
     super.update(dt);
 
-    final oldPosition = Vector2.copy(position);
-    // Move bullet in its direction (직선 이동)
-    position += velocity * dt;
+    // 모델의 위치를 업데이트하고 컴포넌트 위치와 동기화
+    model.updatePosition(dt);
+    position = model.position;
 
-    // 총알이 화면 안에 있는지 확인
-    final game = parent! as AvoidBubbleGame;
-
-    // Debug: 패턴 3 총알(수직 이동)의 위치 추적
-    if (velocity.x == 0 && velocity.y != 0) {
-      if (game.survivalTime % 2.0 < 0.1) {
-        print('⬆️  Pattern 3 bullet: pos=$position, vel=$velocity');
-      }
-    }
-
-    // Remove bullet if it's off-screen (any direction)
-    final isOffScreen = position.x < -radius || 
-                       position.x > game.size.x + radius ||
-                       position.y < -radius || 
-                       position.y > game.size.y + radius;
-                       
-    if (isOffScreen) {
-      print('🗑️  Bullet removed at pos=$position (was at $oldPosition), screen size: ${game.size}');
+    // 모델의 로직에 따라 화면을 벗어났는지 확인하고 제거
+    if (model.shouldRemove(game.size, game.player.position)) {
       removeFromParent();
-      return; // 즉시 리턴하여 다른 로직 실행 방지
-    }
-    
-    // 추가 안전 장치: 화면에서 너무 멀리 벗어난 경우
-    if (position.x.abs() > 5000 || position.y.abs() > 5000) {
-      print('⚠️  Bullet at extreme position $position - force removing!');
-      removeFromParent();
-      return;
     }
   }
+
+  // 충돌 감지를 위한 총알의 반지름 getter
+  double get radius => size.x / 2;
 }
