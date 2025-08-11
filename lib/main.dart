@@ -1,4 +1,5 @@
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/avoid_bubble_game.dart';
@@ -8,8 +9,14 @@ import 'models/game_stats.dart';
 import 'screens/start_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
+import 'config/environment_config.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 환경 설정 초기화
+  await EnvironmentConfig.initialize();
+  
   runApp(const MyApp());
 }
 
@@ -38,12 +45,20 @@ class GameWrapperState extends State<GameWrapper> {
   GameState _currentState = GameState.startScreen;
   late AvoidBubbleGame game;
   GameSettings _settings = GameSettings.defaultSettings();
-  final GameStats _stats = GameStats();
+  GameStats? _stats;
 
   @override
   void initState() {
     super.initState();
+    _loadStats();
     _createNewGame();
+  }
+
+  Future<void> _loadStats() async {
+    final stats = await GameStats.load();
+    setState(() {
+      _stats = stats;
+    });
   }
 
   void _createNewGame() {
@@ -58,6 +73,7 @@ class GameWrapperState extends State<GameWrapper> {
   }
 
   void _showGameOver() {
+    _stats?.recordGame(game.survivalTime, 'F', 0); // Grade and bullets avoided are not implemented yet
     setState(() {
       _currentState = GameState.gameOver;
     });
@@ -92,12 +108,20 @@ class GameWrapperState extends State<GameWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    if (_stats == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     switch (_currentState) {
       case GameState.startScreen:
         return StartScreen(
           onStartGame: _startGame,
           onShowSettings: _showSettings,
-          stats: _stats,
+          stats: _stats!,
         );
       case GameState.settings:
         return SettingsScreen(
@@ -209,58 +233,7 @@ class GameScreenState extends State<GameScreen> {
           child: Stack(
             children: [
               GameWidget(game: widget.game),
-              // Virtual controls overlay
-              Positioned.fill(
-                child: Row(
-                  children: [
-                    // Left side - left movement
-                    Expanded(
-                      child: GestureDetector(
-                        onTapDown: (_) => widget.game.setPlayerMovement(-1, 0),
-                        onTapUp: (_) => widget.game.setPlayerMovement(0, 0),
-                        onTapCancel: () => widget.game.setPlayerMovement(0, 0),
-                        child: Container(
-                          color: Colors.transparent,
-                          child: const Center(
-                            child: Icon(
-                              Icons.arrow_left,
-                              size: 50,
-                              color: Colors.white30,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Right side - right movement
-                    Expanded(
-                      child: GestureDetector(
-                        onTapDown: (_) => widget.game.setPlayerMovement(1, 0),
-                        onTapUp: (_) => widget.game.setPlayerMovement(0, 0),
-                        onTapCancel: () => widget.game.setPlayerMovement(0, 0),
-                        child: Container(
-                          color: Colors.transparent,
-                          child: const Center(
-                            child: Icon(
-                              Icons.arrow_right,
-                              size: 50,
-                              color: Colors.white30,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Instructions
-              const Positioned(
-                top: 100,
-                left: 20,
-                child: Text(
-                  'WASD/Arrow keys or tap left/right to move\nESC or Home button to return to menu\nAvoid the bubbles!',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ),
+
               // Home button (맨 위에 위치하여 다른 요소들에 가려지지 않도록)
               Positioned(
                 top: 40,

@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 // 게임 통계를 관리하는 클래스
 class GameStats {
   double bestTime; // 최고 생존 시간
@@ -5,7 +7,7 @@ class GameStats {
   int totalBulletsAvoided; // 총 피한 총알 수
   double totalPlayTime; // 총 플레이 시간
   Map<String, int> gradeCount; // 등급별 횟수
-  
+
   // 생성자
   GameStats({
     this.bestTime = 0.0,
@@ -13,45 +15,49 @@ class GameStats {
     this.totalBulletsAvoided = 0,
     this.totalPlayTime = 0.0,
     Map<String, int>? gradeCount,
-  }) : gradeCount = gradeCount ?? {
-    'S': 0,
-    'A': 0,
-    'B': 0,
-    'C': 0,
-    'D': 0,
-    'F': 0,
-  };
+  }) : gradeCount = gradeCount ??
+            {
+              'S': 0,
+              'A': 0,
+              'B': 0,
+              'C': 0,
+              'D': 0,
+              'F': 0,
+            };
 
-  // 게임 결과를 기록
-  void recordGame(double survivalTime, String grade, int bulletsAvoided) {
+  // 게임 결과를 기록하고 저장
+  Future<void> recordGame(double survivalTime, String grade, int bulletsAvoided) async {
     if (survivalTime > bestTime) {
       bestTime = survivalTime;
     }
-    
+
     totalGamesPlayed++;
     totalBulletsAvoided += bulletsAvoided;
     totalPlayTime += survivalTime;
-    
+
     gradeCount[grade] = (gradeCount[grade] ?? 0) + 1;
+
+    await save();
   }
 
   // 평균 플레이 시간 getter
-  double get averagePlayTime => totalGamesPlayed > 0 ? totalPlayTime / totalGamesPlayed : 0.0;
-  
+  double get averagePlayTime =>
+      totalGamesPlayed > 0 ? totalPlayTime / totalGamesPlayed : 0.0;
+
   // 가장 많이 받은 등급 getter
   String get mostCommonGrade {
     if (gradeCount.isEmpty) return 'F';
-    
+
     String mostCommon = 'F';
     int maxCount = 0;
-    
+
     gradeCount.forEach((grade, count) {
       if (count > maxCount) {
         maxCount = count;
         mostCommon = grade;
       }
     });
-    
+
     return mostCommon;
   }
 
@@ -72,8 +78,39 @@ class GameStats {
     );
   }
 
+  // 통계를 SharedPreferences에 저장
+  Future<void> save() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('bestTime', bestTime);
+    await prefs.setInt('totalGamesPlayed', totalGamesPlayed);
+    await prefs.setInt('totalBulletsAvoided', totalBulletsAvoided);
+    await prefs.setDouble('totalPlayTime', totalPlayTime);
+    gradeCount.forEach((grade, count) {
+      prefs.setInt('grade_$grade', count);
+    });
+  }
+
+  // SharedPreferences에서 통계를 로드
+  static Future<GameStats> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final gradeCount = <String, int>{};
+    final grades = ['S', 'A', 'B', 'C', 'D', 'F'];
+    for (String grade in grades) {
+      gradeCount[grade] = prefs.getInt('grade_$grade') ?? 0;
+    }
+
+    return GameStats(
+      bestTime: prefs.getDouble('bestTime') ?? 0.0,
+      totalGamesPlayed: prefs.getInt('totalGamesPlayed') ?? 0,
+      totalBulletsAvoided: prefs.getInt('totalBulletsAvoided') ?? 0,
+      totalPlayTime: prefs.getDouble('totalPlayTime') ?? 0.0,
+      gradeCount: gradeCount,
+    );
+  }
+
+
   // 통계 리셋
-  void reset() {
+  Future<void> reset() async {
     bestTime = 0.0;
     totalGamesPlayed = 0;
     totalBulletsAvoided = 0;
@@ -86,5 +123,6 @@ class GameStats {
       'D': 0,
       'F': 0,
     };
+    await save();
   }
 }

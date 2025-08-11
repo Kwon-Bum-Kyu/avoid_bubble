@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/game_settings.dart';
+import '../config/environment_config.dart';
 
 class SettingsScreen extends StatefulWidget {
   final GameSettings settings;
@@ -90,7 +91,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const Expanded(
                       child: Text(
-                        'Settings',
+                        '설정',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -111,111 +112,167 @@ class SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSection(
-                        'Game Difficulty',
-                        [
-                          _buildSlider(
-                            'Bullet Speed',
-                            _currentSettings.bulletSpeed,
-                            40.0,
-                            150.0,
-                            (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(bulletSpeed: value);
-                            }),
-                          ),
-                          _buildSlider(
-                            'Player Speed',
-                            _currentSettings.playerSpeed,
-                            200.0,
-                            500.0,
-                            (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(playerSpeed: value);
-                            }),
-                          ),
-                          _buildSwitch(
-                            'Invincible Mode',
-                            _currentSettings.isInvincible,
-                            (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(isInvincible: value);
-                            }),
-                          ),
-                        ],
-                      ),
+                      // 개발자 모드 섹션 (로컬 빌드에서만 표시)
+                      if (EnvironmentConfig.isDeveloperModeEnabled) ...[
+                        _buildSection(
+                          '게임 난이도 (개발자 모드)',
+                          [
+                            _buildSlider(
+                              '총알 속도',
+                              _currentSettings.bulletSpeed,
+                              40.0,
+                              150.0,
+                              (value) => setState(() {
+                                _currentSettings = _currentSettings.copyWith(bulletSpeed: value);
+                              }),
+                            ),
+                            _buildSlider(
+                              '플레이어 속도',
+                              _currentSettings.playerSpeed,
+                              200.0,
+                              500.0,
+                              (value) => setState(() {
+                                _currentSettings = _currentSettings.copyWith(playerSpeed: value);
+                              }),
+                            ),
+                            _buildSwitch(
+                              '무적 모드',
+                              _currentSettings.isInvincible,
+                              (value) => setState(() {
+                                _currentSettings = _currentSettings.copyWith(isInvincible: value);
+                              }),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                      
+                      // 패턴 시간 조정 섹션 (로컬 빌드에서만 표시)
+                      if (EnvironmentConfig.isDeveloperModeEnabled) ...[
+                        _buildSection(
+                          '패턴 시간 (개발자 모드)',
+                          [
+                            _buildSlider(
+                              '패턴 1 시작 (초)',
+                              _currentSettings.patternTimings.pattern1StartTime,
+                              1.0,
+                              10.0,
+                              (value) => setState(() {
+                                _currentSettings = _currentSettings.copyWith(
+                                  patternTimings: _currentSettings.patternTimings.copyWith(
+                                    pattern1StartTime: value,
+                                  ),
+                                );
+                              }),
+                            ),
+                            _buildSlider(
+                              '패턴 2 시작 (초)',
+                              _currentSettings.patternTimings.pattern2StartTime,
+                              10.0,
+                              30.0,
+                              (value) => setState(() {
+                                _currentSettings = _currentSettings.copyWith(
+                                  patternTimings: _currentSettings.patternTimings.copyWith(
+                                    pattern2StartTime: value,
+                                  ),
+                                );
+                              }),
+                            ),
+                            _buildSlider(
+                              '패턴 3 시작 (초)',
+                              _currentSettings.patternTimings.pattern3StartTime,
+                              20.0,
+                              60.0,
+                              (value) => setState(() {
+                                _currentSettings = _currentSettings.copyWith(
+                                  patternTimings: _currentSettings.patternTimings.copyWith(
+                                    pattern3StartTime: value,
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       
                       const SizedBox(height: 20),
                       
                       _buildSection(
-                        'Pattern Timings',
-                        [
-                          _buildSlider(
-                            'Pattern 1 Start (sec)',
-                            _currentSettings.patternTimings.pattern1StartTime,
-                            1.0,
-                            10.0,
-                            (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(
-                                patternTimings: _currentSettings.patternTimings.copyWith(
-                                  pattern1StartTime: value,
-                                ),
-                              );
-                            }),
-                          ),
-                          _buildSlider(
-                            'Pattern 2 Start (sec)',
-                            _currentSettings.patternTimings.pattern2StartTime,
-                            10.0,
-                            30.0,
-                            (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(
-                                patternTimings: _currentSettings.patternTimings.copyWith(
-                                  pattern2StartTime: value,
-                                ),
-                              );
-                            }),
-                          ),
-                          _buildSlider(
-                            'Pattern 3 Start (sec)',
-                            _currentSettings.patternTimings.pattern3StartTime,
-                            20.0,
-                            60.0,
-                            (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(
-                                patternTimings: _currentSettings.patternTimings.copyWith(
-                                  pattern3StartTime: value,
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      _buildSection(
-                        'Visual & Audio',
+                        '시각 및 오디오',
                         [
                           _buildSwitch(
-                            'Show Hitboxes',
+                            '히트박스 표시',
                             _currentSettings.showHitboxes,
                             (value) => setState(() {
                               _currentSettings = _currentSettings.copyWith(showHitboxes: value);
                             }),
                           ),
                           _buildSwitch(
-                            'Sound Effects',
+                            '사운드 효과',
                             _currentSettings.soundEnabled,
                             (value) => setState(() {
                               _currentSettings = _currentSettings.copyWith(soundEnabled: value);
                             }),
                           ),
                           _buildSlider(
-                            'Sound Volume',
+                            '사운드 볼륨',
                             _currentSettings.soundVolume,
                             0.0,
                             1.0,
                             (value) => setState(() {
                               _currentSettings = _currentSettings.copyWith(soundVolume: value);
                             }),
+                          ),
+                        ],
+                      ),
+                      
+                      // 환경 정보 표시
+                      _buildSection(
+                        '빌드 정보',
+                        [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: EnvironmentConfig.isDeveloperModeEnabled 
+                                  ? Colors.orange.withOpacity(0.3)
+                                  : Colors.green.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '환경: ${EnvironmentConfig.environmentName}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  EnvironmentConfig.isDeveloperModeEnabled 
+                                      ? '개발자 기능이 활성화되어 있습니다.'
+                                      : '프로덕션 모드로 실행 중입니다.',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                if (EnvironmentConfig.showDebugInfo) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '디버그 모드: ${EnvironmentConfig.isLocal ? "활성" : "비활성"}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white60,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -232,20 +289,22 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 backgroundColor: Colors.grey[700],
                                 padding: const EdgeInsets.symmetric(vertical: 15),
                               ),
-                              child: const Text('Reset to Defaults'),
+                              child: const Text('기본값으로 재설정'),
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _loadDebugSettings,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange[700],
-                                padding: const EdgeInsets.symmetric(vertical: 15),
+                          // 디버그 모드 버튼은 로컬 빌드에서만 표시
+                          if (EnvironmentConfig.isDeveloperModeEnabled)
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _loadDebugSettings,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange[700],
+                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                ),
+                                child: const Text('디버그 모드'),
                               ),
-                              child: const Text('Debug Mode'),
                             ),
-                          ),
                         ],
                       ),
                       
@@ -260,7 +319,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 15),
                           ),
                           child: const Text(
-                            'Save Settings',
+                            '설정 저장',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),

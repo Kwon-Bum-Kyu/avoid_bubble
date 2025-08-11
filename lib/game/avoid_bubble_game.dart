@@ -1,5 +1,6 @@
-import 'package:flame/game.dart';
 import 'package:flame/components.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../components/player.dart';
@@ -23,6 +24,9 @@ class AvoidBubbleGame extends FlameGame {
   bool isGameOver = false; // 게임 오버 상태
   final Random random = Random(); // 랜덤 숫자 생성기
   VoidCallback? onGameOver; // 게임 오버 시 호출될 콜백
+  
+  // 모바일용 조이스틱 (웹에서는 null)
+  JoystickComponent? joystick;
 
   // 생성자
   AvoidBubbleGame({required this.settings});
@@ -34,16 +38,61 @@ class AvoidBubbleGame extends FlameGame {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // 배경 이미지 추가
+    // 배경 이미지 추가 (start screen과 동일한 cover 방식)
     final background = await Sprite.load('background.png');
+    final imageAspectRatio = background.srcSize.x / background.srcSize.y;
+    final screenAspectRatio = size.x / size.y;
+
+    // BoxFit.cover와 동일한 로직: 이미지가 화면을 완전히 덮도록 크기 조정
+    late Vector2 newSize;
+    if (screenAspectRatio > imageAspectRatio) {
+      // 화면이 더 넓을 때: 화면 너비에 맞춰 조정
+      newSize = Vector2(size.x, size.x / imageAspectRatio);
+    } else {
+      // 화면이 더 높을 때: 화면 높이에 맞춰 조정
+      newSize = Vector2(size.y * imageAspectRatio, size.y);
+    }
+
     add(
-      SpriteComponent(sprite: background, size: size, anchor: Anchor.topLeft)
-        ..priority = 0, // 우선순위를 낮게 설정하여 배경에 위치
+      SpriteComponent(sprite: background)
+        ..size = newSize
+        ..anchor = Anchor.center
+        ..position = size / 2
+        ..priority = 0,
     );
 
     // 플레이어 추가
     player = Player(speed: settings.playerSpeed);
     add(player..priority = 1);
+
+    // 모바일 플랫폼(Android/iOS)에서만 조이스틱 추가
+    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || 
+                    defaultTargetPlatform == TargetPlatform.iOS)) {
+      // 조이스틱 배경 (반투명한 원)
+      final background = CircleComponent(
+        radius: 60,
+        paint: Paint()
+          ..color = Colors.white.withOpacity(0.2)
+          ..style = PaintingStyle.fill,
+      );
+      
+      // 조이스틱 손잡이 (작은 원)
+      final knob = CircleComponent(
+        radius: 25,
+        paint: Paint()
+          ..color = Colors.white.withOpacity(0.6)
+          ..style = PaintingStyle.fill,
+      );
+      
+      // 조이스틱 컴포넌트 생성
+      joystick = JoystickComponent(
+        background: background,
+        knob: knob,
+        margin: const EdgeInsets.only(left: 40, bottom: 40),
+      );
+      
+      add(joystick!);
+    }
 
     // 생존 시간 텍스트 추가
     timeText = TextComponent(
@@ -313,6 +362,17 @@ class AvoidBubbleGame extends FlameGame {
 
       // 총알 패턴 관리
       _handleBulletPatterns();
+
+      // 조이스틱 입력 처리 (모바일에서만)
+      if (joystick != null) {
+        if (!joystick!.delta.isZero()) {
+          // 조이스틱이 움직이고 있으면 해당 방향으로 플레이어 이동
+          player.setMovement(joystick!.delta.x, joystick!.delta.y);
+        } else {
+          // 조이스틱이 중앙에 있으면 플레이어 정지
+          player.setMovement(0, 0);
+        }
+      }
     }
   }
 

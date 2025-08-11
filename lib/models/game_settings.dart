@@ -1,4 +1,6 @@
 
+import '../config/environment_config.dart';
+
 class GameSettings {
   // 게임 난이도
   double bulletSpeed; // 총알 속도
@@ -40,10 +42,18 @@ class GameSettings {
     bool? reducedMotion,
   }) {
     return GameSettings(
-      bulletSpeed: bulletSpeed ?? this.bulletSpeed,
-      playerSpeed: playerSpeed ?? this.playerSpeed,
-      isInvincible: isInvincible ?? this.isInvincible,
-      patternTimings: patternTimings ?? this.patternTimings,
+      bulletSpeed: EnvironmentConfig.isDeveloperModeEnabled 
+          ? (bulletSpeed ?? this.bulletSpeed) 
+          : this.bulletSpeed, // 프로덕션에서는 기존 값 유지
+      playerSpeed: EnvironmentConfig.isDeveloperModeEnabled 
+          ? (playerSpeed ?? this.playerSpeed) 
+          : this.playerSpeed, // 프로덕션에서는 기존 값 유지
+      isInvincible: EnvironmentConfig.isDeveloperModeEnabled 
+          ? (isInvincible ?? this.isInvincible) 
+          : false, // 프로덕션에서는 항상 false
+      patternTimings: EnvironmentConfig.isDeveloperModeEnabled 
+          ? (patternTimings ?? this.patternTimings) 
+          : this.patternTimings, // 프로덕션에서는 기존 값 유지
       soundEnabled: soundEnabled ?? this.soundEnabled,
       soundVolume: soundVolume ?? this.soundVolume,
       showHitboxes: showHitboxes ?? this.showHitboxes,
@@ -56,8 +66,12 @@ class GameSettings {
     return GameSettings();
   }
 
-  // 개발용 디버그 설정
+  // 개발용 디버그 설정 (로컬 빌드에서만 작동)
   static GameSettings debugSettings() {
+    if (!EnvironmentConfig.isDeveloperModeEnabled) {
+      return defaultSettings(); // 프로덕션에서는 기본 설정 반환
+    }
+    
     return GameSettings(
       isInvincible: true,
       showHitboxes: true,
@@ -65,6 +79,12 @@ class GameSettings {
       playerSpeed: 400.0,
     );
   }
+  
+  /// 개발자 모드가 활성화되어 있는지 확인
+  static bool get isDeveloperModeAvailable => EnvironmentConfig.isDeveloperModeEnabled;
+  
+  /// 현재 빌드 환경 정보
+  static String get buildEnvironment => EnvironmentConfig.environmentName;
 }
 
 // 총알 패턴의 타이밍을 관리하는 클래스
