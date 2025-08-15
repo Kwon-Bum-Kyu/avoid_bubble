@@ -9,13 +9,29 @@ import 'models/game_stats.dart';
 import 'screens/start_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
+import 'screens/ranking_screen.dart';
 import 'config/environment_config.dart';
+import 'config/supabase_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 환경 설정 초기화
-  await EnvironmentConfig.initialize();
+  try {
+    // 환경 설정 초기화
+    await EnvironmentConfig.initialize();
+    
+    // Supabase 초기화
+    await SupabaseConfig.initialize();
+    
+    if (kDebugMode) {
+      print('✅ Supabase initialized successfully');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('❌ Initialization error: $e');
+      print('⚠️  Running without Supabase (ranking disabled)');
+    }
+  }
   
   runApp(const MyApp());
 }
@@ -106,6 +122,12 @@ class GameWrapperState extends State<GameWrapper> {
     });
   }
 
+  void _showRanking() {
+    setState(() {
+      _currentState = GameState.ranking;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_stats == null) {
@@ -136,6 +158,11 @@ class GameWrapperState extends State<GameWrapper> {
           survivalTime: game.survivalTime,
           onRestart: _restartGame,
           onBackToMenu: _backToStart,
+          onShowRanking: _showRanking,
+        );
+      case GameState.ranking:
+        return RankingScreen(
+          onBack: _backToStart,
         );
     }
   }

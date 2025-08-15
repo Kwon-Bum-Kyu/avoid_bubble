@@ -3,4 +3,5 @@ enum GameState {
   settings,
   playing,
   gameOver,
+  ranking,
 }

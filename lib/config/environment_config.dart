@@ -3,13 +3,45 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// 환경 설정을 관리하는 클래스
 class EnvironmentConfig {
-  /// dotenv 초기화
+  /// dotenv 초기화 (환경에 따라 다른 파일 로드)
   static Future<void> initialize() async {
     try {
-      await dotenv.load(fileName: ".env");
+      // Flutter 빌드 모드에 따라 환경 파일 선택
+      String envFile;
+      if (kReleaseMode) {
+        // 릴리즈 빌드 = 프로덕션 환경
+        envFile = ".env.production";
+      } else if (kDebugMode) {
+        // 디버그 빌드 = 개발 환경
+        envFile = ".env.development";
+      } else {
+        // 프로필 빌드 = 기본 환경
+        envFile = ".env";
+      }
+      
+      await dotenv.load(fileName: envFile);
+      
+      if (kDebugMode) {
+        print('✅ Environment loaded: $envFile');
+        print('🌍 Current environment: ${environmentName}');
+        print('🔧 Developer mode: ${isDeveloperModeEnabled}');
+      }
     } catch (e) {
       if (kDebugMode) {
-        print('Failed to load .env file: $e');
+        print('❌ Failed to load environment file: $e');
+        print('🔄 Trying fallback .env file...');
+      }
+      
+      // 실패시 기본 .env 파일로 폴백
+      try {
+        await dotenv.load(fileName: ".env");
+        if (kDebugMode) {
+          print('✅ Fallback .env file loaded');
+        }
+      } catch (fallbackError) {
+        if (kDebugMode) {
+          print('❌ Fallback also failed: $fallbackError');
+        }
       }
     }
   }
@@ -64,4 +96,22 @@ class EnvironmentConfig {
     final debugInfo = dotenv.env['DEBUG_INFO']?.toLowerCase() ?? 'false';
     return debugInfo == 'true' || debugInfo == '1';
   }
+  
+  /// API 타임아웃 (밀리초)
+  static int get apiTimeout {
+    final timeout = dotenv.env['API_TIMEOUT'];
+    return int.tryParse(timeout ?? '5000') ?? 5000;
+  }
+  
+  /// 최대 재시도 횟수
+  static int get maxRetries {
+    final retries = dotenv.env['MAX_RETRIES'];
+    return int.tryParse(retries ?? '2') ?? 2;
+  }
+  
+  /// Supabase URL
+  static String? get supabaseUrl => dotenv.env['SUPABASE_URL'];
+  
+  /// Supabase Anon Key
+  static String? get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'];
 }
