@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+    <!-- Base href with dynamic handling for itch.io -->
+    <script>
+      // Set base href dynamically based on hosting environment
+      var baseHref = '/';
+      if (window.location.hostname.includes('itch.zone') || 
+          window.location.hostname.includes('itch.io') ||
+          window.location.protocol === 'file:') {
+        baseHref = './';
+      }
+      document.write('<base href="' + baseHref + '" />');
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="Avoid Bubble Game Cross Platform" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="avoid_bubble" />
+    <link rel="apple-touch-icon" href="./icons/Icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./favicon.png" />
+
+    <!-- Itch.io compatibility -->
+    <meta name="referrer" content="no-referrer" />
+
+    <title>어보이드 버블 - Avoid Bubble</title>
+    <link rel="manifest" href="./manifest.json" />
+  </head>
+  <body>
+    <!-- Loading screen for better UX -->
+    <div
+      id="loading"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #1a1a1a;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        z-index: 9999;
+      "
+    >
+      <div style="text-align: center">
+        <div style="font-size: 24px; margin-bottom: 20px">🔥 어보이드 버블</div>
+        <div style="font-size: 16px; opacity: 0.7">게임을 로딩중입니다...</div>
+        <div style="margin-top: 20px">
+          <div
+            style="
+              width: 200px;
+              height: 4px;
+              background: #333;
+              border-radius: 2px;
+              overflow: hidden;
+            "
+          >
+            <div
+              style="
+                width: 0%;
+                height: 100%;
+                background: linear-gradient(90deg, #ff6b6b, #ffa500);
+                border-radius: 2px;
+                animation: loading 2s infinite ease-in-out;
+              "
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes loading {
+        0% {
+          width: 0%;
+        }
+        50% {
+          width: 70%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+    </style>
+
+    <script>
+      // Hide loading screen when Flutter is ready
+      window.addEventListener("flutter-first-frame", function () {
+        const loading = document.querySelector("#loading");
+        if (loading) {
+          loading.remove();
+        }
+      });
+
+      // Fallback: hide loading screen after 10 seconds
+      setTimeout(function () {
+        const loading = document.querySelector("#loading");
+        if (loading) {
+          loading.remove();
+        }
+      }, 10000);
+    </script>
+
+    <script src="./flutter_bootstrap.js" async></script>
+  </body>
+</html>
