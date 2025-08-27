@@ -1,0 +1,107 @@
+name: Deploy to itch.io
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number for the build'
+        required: false
+        default: ''
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        channel: 'stable'
+
+    - name: Get Flutter dependencies
+      run: flutter pub get
+
+    - name: Run Flutter analyze
+      run: flutter analyze --no-pub
+
+    - name: Run tests
+      run: flutter test
+
+    - name: Build web release
+      env:
+        ENVIRONMENT: production
+        DEVELOPER_MODE_ENABLED: false
+        DEBUG_INFO: false
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        API_TIMEOUT: 5000
+        MAX_RETRIES: 2
+      run: |
+        # Remove .env files from assets to prevent sensitive data exposure
+        rm -f assets/.env* || true
+        
+        # Create production environment file for build
+        cat > .env.production << EOF
+        ENVIRONMENT=production
+        DEVELOPER_MODE_ENABLED=false
+        DEBUG_INFO=false
+        SUPABASE_URL=$SUPABASE_URL
+        SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+        API_TIMEOUT=5000
+        MAX_RETRIES=2
+        EOF
+        
+        flutter build web --release
+
+    - name: Setup Butler
+      run: |
+        curl -L -o butler.zip "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
+        unzip butler.zip
+        chmod +x butler
+        sudo mv butler /usr/local/bin/
+
+    - name: Verify Butler installation
+      run: butler -V
+
+    - name: Set version number
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          # Tagged release
+          VERSION=${GITHUB_REF#refs/tags/}
+        elif [ "${{ github.event.inputs.version }}" != "" ]; then
+          # Manual workflow with version input
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          # Auto-generated version from commit
+          VERSION="build-$(date +'%Y%m%d-%H%M')-${GITHUB_SHA:0:7}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+
+    - name: Deploy to itch.io
+      env:
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        ITCH_USER: ${{ secrets.ITCH_USER }}
+        ITCH_GAME: ${{ secrets.ITCH_GAME }}
+      run: |
+        butler push build/web $ITCH_USER/$ITCH_GAME:web --userversion "${{ steps.version.outputs.version }}"
+
+    - name: Create deployment summary
+      run: |
+        echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
+        echo "**Game**: ${{ secrets.ITCH_USER }}/${{ secrets.ITCH_GAME }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Channel**: web" >> $GITHUB_STEP_SUMMARY
+        echo "**Build time**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit**: ${GITHUB_SHA:0:7}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🎮 **Play now**: https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }}" >> $GITHUB_STEP_SUMMARY
