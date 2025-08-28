@@ -90,7 +90,7 @@ class _NicknameRegistrationScreenState extends State<NicknameRegistrationScreen>
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.8),
+                      color: Colors.black.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Column(
@@ -123,10 +123,10 @@ class _NicknameRegistrationScreenState extends State<NicknameRegistrationScreen>
                         // 닉네임 입력 필드
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: _errorMessage != null ? Colors.red : Colors.white.withOpacity(0.3),
+                              color: _errorMessage != null ? Colors.red : Colors.white.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),

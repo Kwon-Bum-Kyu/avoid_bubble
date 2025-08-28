@@ -119,7 +119,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TabBar(
@@ -202,8 +202,8 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             color: isMyRecord 
-                ? Colors.orange.withOpacity(0.2)
-                : Colors.white.withOpacity(0.1),
+                ? Colors.orange.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
             border: isMyRecord 
                 ? Border.all(color: Colors.orange, width: 1)
@@ -317,8 +317,8 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
             color: isPersonalBest 
-                ? Colors.orange.withOpacity(0.3)
-                : Colors.white.withOpacity(0.1),
+                ? Colors.orange.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
             border: isPersonalBest 
                 ? Border.all(color: Colors.orange, width: 2)

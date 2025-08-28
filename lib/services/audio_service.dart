@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/game_settings.dart';
 
-// 웹용 HTML Audio 구현 (조건부 import)
-import 'dart:html' as html show AudioElement if (dart.library.html) '';
+// 웹용 오디오 구현 (조건부 선언)
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:html' as html if (dart.library.html) 'dart:html';
 
 /// 게임 오디오 관리 서비스 (웹/모바일 호환)
 class AudioService {

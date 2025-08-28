@@ -451,7 +451,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           max: max,
           divisions: ((max - min) * 10).round(),
           onChanged: onChanged,
-          activeColor: Colors.blue,
+          thumbColor: Colors.blue,
         ),
         const SizedBox(height: 10),
       ],
@@ -485,7 +485,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           max: 1.0,
           divisions: 20, // 5% 단위로 조절
           onChanged: onChanged,
-          activeColor: Colors.blue,
+          thumbColor: Colors.blue,
         ),
         const SizedBox(height: 10),
       ],
@@ -507,7 +507,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: Colors.green,
+          thumbColor: WidgetStateProperty.all(Colors.green),
         ),
       ],
     );

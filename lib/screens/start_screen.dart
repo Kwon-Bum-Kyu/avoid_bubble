@@ -76,7 +76,7 @@ class StartScreen extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 30),
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(

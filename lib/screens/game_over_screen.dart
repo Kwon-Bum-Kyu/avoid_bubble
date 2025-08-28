@@ -141,15 +141,15 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 margin: const EdgeInsets.all(20),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.9),
+                  color: Colors.black.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: gradeColor.withOpacity(0.6),
+                    color: gradeColor.withValues(alpha: 0.6),
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: gradeColor.withOpacity(0.3),
+                      color: gradeColor.withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
@@ -175,7 +175,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: gradeColor.withOpacity(0.2),
+                        color: gradeColor.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(color: gradeColor, width: 1),
                       ),
@@ -185,7 +185,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                             '생존 시간',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -249,7 +249,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.2),
+                              color: Colors.orange.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: Colors.orange, width: 1),
                             ),
@@ -281,7 +281,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                                 if (_currentRank != null) ...[
                                   const SizedBox(height: 8),
                                   Text(
-                                    '현재 순위: ${_currentRank}위',
+                                    '현재 순위: $_currentRank위',
                                     style: const TextStyle(
                                       color: Colors.orange,
                                       fontSize: 16,
@@ -296,11 +296,11 @@ class _GameOverScreenState extends State<GameOverScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              '현재 순위: ${_currentRank}위',
+                              '현재 순위: $_currentRank위',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -313,7 +313,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.2),
+                            color: Colors.blue.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.blue, width: 1),
                           ),
