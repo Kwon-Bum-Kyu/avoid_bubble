@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/game_settings.dart';
 
-// 웹용 오디오 구현 (조건부 선언)
-// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
-import 'dart:html' as html if (dart.library.html) 'dart:html';
+// 조건부 import - 웹에서는 실제 구현, 다른 플랫폼에서는 스텁
+import 'audio_service_web.dart' 
+  if (dart.library.html) 'audio_service_web.dart'
+  if (dart.library.io) 'audio_service_stub.dart';
 
 /// 게임 오디오 관리 서비스 (웹/모바일 호환)
 class AudioService {
@@ -19,8 +20,8 @@ class AudioService {
   /// 게임 설정
   GameSettings? _settings;
 
-  /// 웹용 오디오 엘리먼트
-  html.AudioElement? _webAudioElement;
+  /// 웹용 오디오 서비스
+  final AudioServiceWeb _webService = AudioServiceWeb();
 
 
   /// 설정 업데이트
@@ -51,8 +52,8 @@ class AudioService {
       await stopBgm();
 
       if (kIsWeb) {
-        // 웹에서는 HTML5 Audio 사용
-        await _playBgmWeb(filename);
+        // 웹에서는 웹 서비스 사용
+        await _webService.playBgmWeb(filename, _settings);
       } else {
         // 모바일/데스크톱에서는 flame_audio 사용
         await _playBgmNative(filename);
@@ -64,60 +65,6 @@ class AudioService {
     }
   }
 
-
-  /// 웹용 BGM 재생
-  Future<void> _playBgmWeb(String filename) async {
-    if (!kIsWeb) return;
-    
-    try {
-      // 웹용 오디오 엘리먼트 생성
-      _webAudioElement = html.AudioElement();
-      
-      // itch.io 호환 경로 설정 - 절대 경로 사용
-      _webAudioElement!.src = 'assets/assets/audio/$filename';
-      _webAudioElement!.loop = true;
-      _webAudioElement!.volume = _getEffectiveVolume();
-      
-      // 브라우저 호환성을 위한 설정
-      _webAudioElement!.preload = 'auto';
-      
-      // 오디오 로딩 대기
-      final completer = Completer<void>();
-      bool hasCompleted = false;
-      
-      _webAudioElement!.onCanPlayThrough.listen((_) {
-        if (!hasCompleted) {
-          hasCompleted = true;
-          completer.complete();
-        }
-      });
-      
-      _webAudioElement!.onError.listen((error) {
-        if (!hasCompleted) {
-          hasCompleted = true;
-          completer.completeError('오디오 로딩 실패');
-        }
-      });
-      
-      // 로딩 완료 대기 (타임아웃 5초)
-      await completer.future.timeout(const Duration(seconds: 5));
-      
-      // 사용자 상호작용 후 재생 (자동재생 정책 대응)
-      await _webAudioElement!.play();
-      
-      } catch (e) {
-      // 자동재생 차단 시 사용자 클릭 후 재생 안내
-      if (e.toString().contains('play() request was interrupted') ||
-          e.toString().contains('NotAllowedError')) {
-        // 사용자 클릭 대기를 위해 오디오 엘리먼트 유지
-        return;
-      }
-      
-      // 다른 오류 시 정리
-      _webAudioElement = null;
-      _currentBgm = null;
-    }
-  }
 
   /// 네이티브용 BGM 재생  
   Future<void> _playBgmNative(String filename) async {
@@ -131,10 +78,8 @@ class AudioService {
   Future<void> stopBgm() async {
     try {
       if (_currentBgm != null) {
-        if (kIsWeb && _webAudioElement != null) {
-          _webAudioElement!.pause();
-          _webAudioElement!.currentTime = 0;
-          _webAudioElement = null;
+        if (kIsWeb) {
+          await _webService.stopBgmWeb();
         }
         
         _currentBgm = null;
@@ -148,10 +93,10 @@ class AudioService {
   Future<void> pauseBgm() async {
     try {
       if (_currentBgm != null) {
-        if (kIsWeb && _webAudioElement != null) {
-          _webAudioElement!.pause();
+        if (kIsWeb) {
+          await _webService.pauseBgmWeb();
         }
-        }
+      }
     } catch (e) {
       // BGM 일시정지 실패는 무시
     }
@@ -161,8 +106,8 @@ class AudioService {
   Future<void> resumeBgm() async {
     try {
       if (_currentBgm != null && (_settings?.soundEnabled ?? true)) {
-        if (kIsWeb && _webAudioElement != null) {
-          await _webAudioElement!.play();
+        if (kIsWeb) {
+          await _webService.resumeBgmWeb();
         }
       }
     } catch (e) {
@@ -172,11 +117,9 @@ class AudioService {
 
   /// 사용자 클릭 시 BGM 시작 시도 (자동재생 정책 우회)
   Future<void> tryPlayBgmOnUserInteraction() async {
-    if (kIsWeb && _webAudioElement != null && _currentBgm != null) {
+    if (kIsWeb && _currentBgm != null) {
       try {
-        if (_webAudioElement!.paused) {
-          await _webAudioElement!.play();
-        }
+        await _webService.tryPlayBgmOnUserInteractionWeb();
       } catch (e) {
         // 사용자 상호작용 BGM 시도 실패는 무시
       }
@@ -196,8 +139,8 @@ class AudioService {
   /// BGM 볼륨 업데이트
   void _updateBgmVolume() {
     if (_currentBgm != null) {
-      if (kIsWeb && _webAudioElement != null) {
-        _webAudioElement!.volume = _getEffectiveVolume();
+      if (kIsWeb) {
+        _webService.updateBgmVolumeWeb(_settings);
       }
     }
   }
@@ -217,6 +160,9 @@ class AudioService {
   /// 모든 오디오 정리
   Future<void> dispose() async {
     await stopBgm();
+    if (kIsWeb) {
+      await _webService.disposeWeb();
+    }
     _settings = null;
     // 정리 완료
   }
