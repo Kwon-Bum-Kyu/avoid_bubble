@@ -145,11 +145,6 @@ class AudioService {
     }
   }
 
-  /// 유효 볼륨 계산 (설정 볼륨 * 사운드 활성화 여부)
-  double _getEffectiveVolume() {
-    if (!(_settings?.soundEnabled ?? true)) return 0.0;
-    return _settings?.soundVolume ?? 0.5;
-  }
 
   /// 현재 BGM 재생 상태
   bool get isBgmPlaying => _currentBgm != null;
