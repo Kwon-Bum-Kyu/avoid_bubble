@@ -36,29 +36,17 @@ jobs:
 
     - name: Build web release
       env:
-        ENVIRONMENT: production
-        DEVELOPER_MODE_ENABLED: false
-        DEBUG_INFO: false
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        API_TIMEOUT: 5000
-        MAX_RETRIES: 2
       run: |
-        # Remove .env files from assets to prevent sensitive data exposure
-        rm -f assets/.env* || true
-        
-        # Create production environment file for build
-        cat > .env.production << EOF
-        ENVIRONMENT=production
-        DEVELOPER_MODE_ENABLED=false
-        DEBUG_INFO=false
-        SUPABASE_URL=$SUPABASE_URL
-        SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
-        API_TIMEOUT=5000
-        MAX_RETRIES=2
-        EOF
-        
-        flutter build web --release
+        flutter build web --release \
+          --dart-define=ENVIRONMENT=production \
+          --dart-define=DEVELOPER_MODE_ENABLED=false \
+          --dart-define=DEBUG_INFO=false \
+          --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
+          --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
+          --dart-define=API_TIMEOUT=5000 \
+          --dart-define=MAX_RETRIES=2
 
     - name: Setup Butler
       run: |

@@ -101,17 +101,20 @@ class EnvironmentConfig {
 
   /// 현재 환경이 로컬인지 확인
   static bool get isLocal {
-    // .env 파일에서 환경 설정을 먼저 확인
-    final environment = dotenv.env['ENVIRONMENT']?.toLowerCase() ?? '';
+    // dart-define 환경 설정 우선 확인 (웹 배포용)
+    const dartDefineEnv = String.fromEnvironment('ENVIRONMENT');
+    String environment = dartDefineEnv.isNotEmpty 
+        ? dartDefineEnv.toLowerCase() 
+        : (dotenv.env['ENVIRONMENT']?.toLowerCase() ?? '');
 
-    // .env에서 명시적으로 production으로 설정된 경우 프로덕션으로 처리
+    // 명시적으로 production으로 설정된 경우 프로덕션으로 처리
     if (environment == 'production' ||
         environment == 'prod' ||
         environment == 'release') {
       return false;
     }
 
-    // .env에서 명시적으로 local로 설정된 경우이고 디버그 모드일 때만 로컬로 처리
+    // 명시적으로 local로 설정된 경우이고 디버그 모드일 때만 로컬로 처리
     if ((environment == 'local' ||
             environment == 'development' ||
             environment == 'dev') &&
@@ -137,9 +140,12 @@ class EnvironmentConfig {
     // 디버그 모드가 아니면 false
     if (!kDebugMode) return false;
 
-    // .env 파일에서 개발자 모드 설정 확인 (디버그 모드에서만)
-    final developerMode =
-        dotenv.env['DEVELOPER_MODE_ENABLED']?.toLowerCase() ?? 'false';
+    // dart-define 개발자 모드 설정 우선 확인 (웹 배포용)
+    const dartDefineDeveloperMode = String.fromEnvironment('DEVELOPER_MODE_ENABLED');
+    String developerMode = dartDefineDeveloperMode.isNotEmpty 
+        ? dartDefineDeveloperMode.toLowerCase() 
+        : (dotenv.env['DEVELOPER_MODE_ENABLED']?.toLowerCase() ?? 'false');
+        
     return developerMode == 'true' || developerMode == '1';
   }
 
@@ -152,25 +158,54 @@ class EnvironmentConfig {
   static bool get showDebugInfo {
     if (isProduction) return false;
 
-    final debugInfo = dotenv.env['DEBUG_INFO']?.toLowerCase() ?? 'false';
+    // dart-define 디버그 정보 설정 우선 확인 (웹 배포용)
+    const dartDefineDebugInfo = String.fromEnvironment('DEBUG_INFO');
+    String debugInfo = dartDefineDebugInfo.isNotEmpty 
+        ? dartDefineDebugInfo.toLowerCase() 
+        : (dotenv.env['DEBUG_INFO']?.toLowerCase() ?? 'false');
+        
     return debugInfo == 'true' || debugInfo == '1';
   }
 
   /// API 타임아웃 (밀리초)
   static int get apiTimeout {
-    final timeout = dotenv.env['API_TIMEOUT'];
-    return int.tryParse(timeout ?? '5000') ?? 5000;
+    // dart-define API 타임아웃 설정 우선 확인 (웹 배포용)
+    const dartDefineTimeout = String.fromEnvironment('API_TIMEOUT');
+    String timeout = dartDefineTimeout.isNotEmpty 
+        ? dartDefineTimeout 
+        : (dotenv.env['API_TIMEOUT'] ?? '5000');
+        
+    return int.tryParse(timeout) ?? 5000;
   }
 
   /// 최대 재시도 횟수
   static int get maxRetries {
-    final retries = dotenv.env['MAX_RETRIES'];
-    return int.tryParse(retries ?? '2') ?? 2;
+    // dart-define 최대 재시도 설정 우선 확인 (웹 배포용)
+    const dartDefineRetries = String.fromEnvironment('MAX_RETRIES');
+    String retries = dartDefineRetries.isNotEmpty 
+        ? dartDefineRetries 
+        : (dotenv.env['MAX_RETRIES'] ?? '2');
+        
+    return int.tryParse(retries) ?? 2;
   }
 
-  /// Supabase URL
-  static String? get supabaseUrl => dotenv.env['SUPABASE_URL'];
+  /// Supabase URL (dart-define 우선, 그 다음 .env)
+  static String? get supabaseUrl {
+    // dart-define으로 주입된 값 우선 사용 (웹 배포용)
+    const dartDefineUrl = String.fromEnvironment('SUPABASE_URL');
+    if (dartDefineUrl.isNotEmpty) return dartDefineUrl;
+    
+    // .env 파일의 값 사용 (로컬 개발용)
+    return dotenv.env['SUPABASE_URL'];
+  }
 
-  /// Supabase Anon Key
-  static String? get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'];
+  /// Supabase Anon Key (dart-define 우선, 그 다음 .env)
+  static String? get supabaseAnonKey {
+    // dart-define으로 주입된 값 우선 사용 (웹 배포용)
+    const dartDefineKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+    if (dartDefineKey.isNotEmpty) return dartDefineKey;
+    
+    // .env 파일의 값 사용 (로컬 개발용)
+    return dotenv.env['SUPABASE_ANON_KEY'];
+  }
 }
