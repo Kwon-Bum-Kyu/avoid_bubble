@@ -6,43 +6,54 @@ class EnvironmentConfig {
   /// dotenv 초기화 (환경에 따라 다른 파일 로드)
   static Future<void> initialize() async {
     try {
+      // dart-define으로 환경 변수가 주입되었는지 확인 (웹 배포용)
+      const dartDefineEnv = String.fromEnvironment('ENVIRONMENT');
+      if (dartDefineEnv.isNotEmpty) {
+        // dart-define 환경 변수가 있으면 .env 파일 로딩 건너뛰기
+        if (kDebugMode) {
+          print('✅ dart-define 환경 변수 감지: $dartDefineEnv');
+        }
+        return;
+      }
+
+      // dart-define이 없는 경우에만 .env 파일 로딩 시도 (로컬 개발용)
+      if (kIsWeb && kReleaseMode) {
+        // 웹 릴리즈 빌드에서는 .env 파일 로딩을 건너뛰고 폴백 설정 사용
+        await _setHardcodedWebConfig();
+        return;
+      }
+
       // Flutter 빌드 모드에 따라 환경 파일 선택
       String envFile;
       if (kReleaseMode) {
-        // 릴리즈 빌드 = 프로덕션 환경
         envFile = ".env.production";
       } else if (kDebugMode) {
-        // 디버그 빌드 = 개발 환경
         envFile = ".env.development";
       } else {
-        // 프로필 빌드 = 기본 환경
         envFile = ".env";
       }
 
-      // 웹 플랫폼에서는 더 관대한 로딩 시도
+      // 로컬 환경에서만 .env 파일 로딩 시도
       if (kIsWeb) {
         await _loadEnvironmentForWeb(envFile);
       } else {
         await dotenv.load(fileName: envFile);
       }
 
-      // 프로덕션에서도 로딩 성공 메시지 표시 (Supabase 연결 확인용)
-
-      if (kDebugMode) {}
-
-      // Supabase 설정 확인
-      final url = supabaseUrl;
-      final key = supabaseAnonKey;
-      if (url != null && key != null) {
-      } else {}
     } catch (e) {
-      // 순차적으로 폴백 시도
+      // 폴백 로딩 시도
       await _tryFallbackLoading();
     }
   }
 
   /// 웹 플랫폼용 환경 로딩
   static Future<void> _loadEnvironmentForWeb(String envFile) async {
+    // 웹 릴리즈 빌드에서는 .env 파일 로딩을 시도하지 않음
+    if (kReleaseMode) {
+      await _setHardcodedWebConfig();
+      return;
+    }
+
     try {
       await dotenv.load(fileName: envFile);
     } catch (e) {
@@ -53,6 +64,12 @@ class EnvironmentConfig {
 
   /// 폴백 로딩 시도
   static Future<void> _tryFallbackLoading() async {
+    // 웹 릴리즈 빌드에서는 바로 하드코딩된 설정 사용
+    if (kIsWeb && kReleaseMode) {
+      await _setHardcodedWebConfig();
+      return;
+    }
+
     final fallbackFiles = [".env", ".env.development"];
     bool loaded = false;
 
