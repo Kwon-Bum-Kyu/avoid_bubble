@@ -4,32 +4,30 @@ import 'package:flutter/foundation.dart';
 class EnvironmentConfig {
   /// 환경 설정 초기화 (dart-define만 사용)
   static Future<void> initialize() async {
-    // ignore: avoid_print
-    print('🚀 EnvironmentConfig.initialize() 시작');
+    EnvironmentConfig.debugPrint('🚀 EnvironmentConfig.initialize() 시작');
     
     // dart-define 환경 변수 확인
     const dartDefineEnv = String.fromEnvironment('ENVIRONMENT');
     if (dartDefineEnv.isNotEmpty && kDebugMode) {
-      // ignore: avoid_print
-      print('✅ dart-define 환경 변수 감지: $dartDefineEnv');
+      EnvironmentConfig.debugPrint('✅ dart-define 환경 변수 감지: $dartDefineEnv');
     }
     
-    // ignore: avoid_print
-    print('📝 기본 환경 설정 적용 시작...');
+    EnvironmentConfig.debugPrint('📝 기본 환경 설정 적용 시작...');
     // 기본 환경 설정 적용
     _setDefaultConfig();
     
-    // ignore: avoid_print
-    print('🔍 Supabase 설정 상태 확인 시작...');
-    // Supabase 설정 상태 확인 및 알림 (kDebugMode 조건 제거)
+    EnvironmentConfig.debugPrint('🔍 Supabase 설정 상태 확인 시작...');
+    // Supabase 설정 상태 확인 및 알림
     _logSupabaseStatus();
     
-    // ignore: avoid_print
-    print('✅ EnvironmentConfig.initialize() 완료');
+    EnvironmentConfig.debugPrint('✅ EnvironmentConfig.initialize() 완료');
   }
   
   /// Supabase 설정 상태 로깅 (개발 모드 전용)
   static void _logSupabaseStatus() {
+    // 프로덕션 모드에서는 로깅하지 않음
+    if (kReleaseMode) return;
+    
     final url = supabaseUrl;
     final key = supabaseAnonKey;
     
@@ -37,25 +35,17 @@ class EnvironmentConfig {
     const dartDefineUrl = String.fromEnvironment('SUPABASE_URL');
     const dartDefineKey = String.fromEnvironment('SUPABASE_ANON_KEY');
     
-    // ignore: avoid_print
-    print('🔍 EnvironmentConfig - Supabase 설정 상태 검사:');
-    // ignore: avoid_print
-    print('   - dart-define SUPABASE_URL: ${dartDefineUrl.isNotEmpty ? "${dartDefineUrl.substring(0, 30)}..." : "미설정"}');
-    // ignore: avoid_print
-    print('   - dart-define SUPABASE_ANON_KEY: ${dartDefineKey.isNotEmpty ? "${dartDefineKey.substring(0, 20)}..." : "미설정"}');
-    // ignore: avoid_print
-    print('   - EnvironmentConfig.supabaseUrl getter: ${url != null ? "${url.substring(0, 30)}..." : "null"}');
-    // ignore: avoid_print
-    print('   - EnvironmentConfig.supabaseAnonKey getter: ${key != null ? "${key.substring(0, 20)}..." : "null"}');
+    EnvironmentConfig.debugPrint('🔍 EnvironmentConfig - Supabase 설정 상태 검사:');
+    EnvironmentConfig.debugPrint('   - dart-define SUPABASE_URL: ${dartDefineUrl.isNotEmpty ? "${dartDefineUrl.substring(0, 30)}..." : "미설정"}');
+    EnvironmentConfig.debugPrint('   - dart-define SUPABASE_ANON_KEY: ${dartDefineKey.isNotEmpty ? "${dartDefineKey.substring(0, 20)}..." : "미설정"}');
+    EnvironmentConfig.debugPrint('   - EnvironmentConfig.supabaseUrl getter: ${url != null ? "${url.substring(0, 30)}..." : "null"}');
+    EnvironmentConfig.debugPrint('   - EnvironmentConfig.supabaseAnonKey getter: ${key != null ? "${key.substring(0, 20)}..." : "null"}');
     
     if (url != null && key != null) {
-      // ignore: avoid_print
-      print('🔗 EnvironmentConfig - Supabase 온라인 모드 활성화');
+      EnvironmentConfig.debugPrint('🔗 EnvironmentConfig - Supabase 온라인 모드 활성화');
     } else {
-      // ignore: avoid_print
-      print('📱 EnvironmentConfig - Supabase 오프라인 모드');
-      // ignore: avoid_print
-      print('   ❌ 온라인 랭킹 기능 비활성화');
+      EnvironmentConfig.debugPrint('📱 EnvironmentConfig - Supabase 오프라인 모드');
+      EnvironmentConfig.debugPrint('   ❌ 온라인 랭킹 기능 비활성화');
     }
   }
 
@@ -66,8 +56,7 @@ class EnvironmentConfig {
     // dart-define 전용으로 변경됨 - dotenv 사용하지 않음
     // 모든 환경 변수는 dart-define 또는 기본값으로 처리
     
-    // ignore: avoid_print
-    print('✅ 기본 환경 설정 적용 완료: ${isProduction ? "Production" : "Development"}');
+    EnvironmentConfig.debugPrint('✅ 기본 환경 설정 적용 완료: ${isProduction ? "Production" : "Development"}');
   }
 
 

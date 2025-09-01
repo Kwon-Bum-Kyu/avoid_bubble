@@ -91,7 +91,6 @@ jobs:
           echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| 🎮 게임 | \`${{ secrets.ITCH_USER }}/${{ secrets.ITCH_GAME }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 📦 버전 | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| $MODE_ICON 모드 | **$DEPLOY_MODE 모드** |" >> $GITHUB_STEP_SUMMARY
           echo "| 🕒 배포 시간 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "| 📝 커밋 | \`${GITHUB_SHA:0:7}\` |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

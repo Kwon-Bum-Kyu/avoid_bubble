@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'environment_config.dart';
 
@@ -25,25 +26,22 @@ class SupabaseConfig {
   static Future<void> initialize() async {
     // 이미 초기화된 경우 건너뛰기
     if (_client != null) {
-      // ignore: avoid_print
-      print('✅ Supabase 이미 초기화됨');
+      if (!kReleaseMode) debugPrint('✅ Supabase 이미 초기화됨');
       return;
     }
 
     final supabaseUrl = EnvironmentConfig.supabaseUrl;
     final supabaseAnonKey = EnvironmentConfig.supabaseAnonKey;
 
-    // ignore: avoid_print
-    print('🔧 SupabaseConfig.initialize() 시작');
-    // ignore: avoid_print
-    print('   - URL: ${supabaseUrl != null ? "${supabaseUrl.substring(0, 30)}..." : "null"}');
-    // ignore: avoid_print
-    print('   - Key: ${supabaseAnonKey != null ? "${supabaseAnonKey.substring(0, 20)}..." : "null"}');
+    if (!kReleaseMode) {
+      debugPrint('🔧 SupabaseConfig.initialize() 시작');
+      debugPrint('   - URL: ${supabaseUrl != null ? "${supabaseUrl.substring(0, 30)}..." : "null"}');
+      debugPrint('   - Key: ${supabaseAnonKey != null ? "${supabaseAnonKey.substring(0, 20)}..." : "null"}');
+    }
 
     if (supabaseUrl == null || supabaseAnonKey == null) {
       final errorMessage = 'Supabase URL or ANON KEY not found in environment config';
-      // ignore: avoid_print
-      print('❌ SupabaseConfig 오류: $errorMessage');
+      if (!kReleaseMode) debugPrint('❌ SupabaseConfig 오류: $errorMessage');
       throw Exception(errorMessage);
     }
 
@@ -51,14 +49,12 @@ class SupabaseConfig {
         supabaseAnonKey.contains('your_') ||
         supabaseUrl.contains('your-production-project')) {
       final errorMessage = 'Please update SUPABASE_URL and SUPABASE_ANON_KEY in environment files';
-      // ignore: avoid_print
-      print('❌ SupabaseConfig 오류: $errorMessage');
+      if (!kReleaseMode) debugPrint('❌ SupabaseConfig 오류: $errorMessage');
       throw Exception(errorMessage);
     }
 
     try {
-      // ignore: avoid_print
-      print('🔌 Supabase.initialize() 호출...');
+      if (!kReleaseMode) debugPrint('🔌 Supabase.initialize() 호출...');
       
       // Supabase 초기화 시도 (중복 초기화 오류를 catch로 처리)
       try {
@@ -68,10 +64,10 @@ class SupabaseConfig {
           debug: EnvironmentConfig.showDebugInfo, // 환경에 따라 디버그 모드 설정
         );
       } catch (e) {
-        // ignore: avoid_print
-        print('🔍 Supabase.initialize() 오류 상세: $e');
-        // ignore: avoid_print
-        print('🔍 오류 타입: ${e.runtimeType}');
+        if (!kReleaseMode) {
+          debugPrint('🔍 Supabase.initialize() 오류 상세: $e');
+          debugPrint('🔍 오류 타입: ${e.runtimeType}');
+        }
         
         // 다양한 중복 초기화 오류 패턴 확인
         final errorStr = e.toString().toLowerCase();
@@ -79,12 +75,10 @@ class SupabaseConfig {
             errorStr.contains('already') ||
             errorStr.contains('initialized') ||
             e.runtimeType.toString().contains('NotInitializedError')) {
-          // ignore: avoid_print
-          print('⚠️ Supabase 이미 초기화됨');
+          if (!kReleaseMode) debugPrint('⚠️ Supabase 이미 초기화됨');
           // 기존 인스턴스 사용
         } else {
-          // ignore: avoid_print
-          print('❌ 예상하지 못한 Supabase 초기화 오류: $e');
+          if (!kReleaseMode) debugPrint('❌ 예상하지 못한 Supabase 초기화 오류: $e');
           // 다른 오류면 재발생
           rethrow;
         }
@@ -92,24 +86,21 @@ class SupabaseConfig {
       
       _client = Supabase.instance.client;
       
-      // ignore: avoid_print
-      print('✅ Supabase 클라이언트 생성 완료');
+      if (!kReleaseMode) debugPrint('✅ Supabase 클라이언트 생성 완료');
       
       // 연결 테스트
-      // ignore: avoid_print
-      print('🔍 연결 테스트 시작...');
+      if (!kReleaseMode) debugPrint('🔍 연결 테스트 시작...');
       final connectionOk = await checkConnection();
-      if (connectionOk) {
-        // ignore: avoid_print
-        print('✅ Supabase 연결 테스트 성공');
-      } else {
-        // ignore: avoid_print
-        print('⚠️ Supabase 연결 테스트 실패 (네트워크 오류일 수 있음)');
+      if (!kReleaseMode) {
+        if (connectionOk) {
+          debugPrint('✅ Supabase 연결 테스트 성공');
+        } else {
+          debugPrint('⚠️ Supabase 연결 테스트 실패 (네트워크 오류일 수 있음)');
+        }
       }
       
     } catch (e) {
-      // ignore: avoid_print
-      print('❌ SupabaseConfig 초기화 실패: $e');
+      if (!kReleaseMode) debugPrint('❌ SupabaseConfig 초기화 실패: $e');
       rethrow;
     }
   }
@@ -122,8 +113,7 @@ class SupabaseConfig {
       await _client!.from('rankings').select('id').limit(1);
       return true; // 쿼리가 성공하면 연결됨 (빈 테이블이어도 OK)
     } catch (e) {
-      // ignore: avoid_print
-      print('   ⚠️ 연결 테스트 오류: $e');
+      if (!kReleaseMode) debugPrint('   ⚠️ 연결 테스트 오류: $e');
       return false;
     }
   }
