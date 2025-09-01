@@ -1,128 +1,85 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// 환경 설정을 관리하는 클래스
 class EnvironmentConfig {
-  /// dotenv 초기화 (환경에 따라 다른 파일 로드)
+  /// 환경 설정 초기화 (dart-define만 사용)
   static Future<void> initialize() async {
-    try {
-      // dart-define으로 환경 변수가 주입되었는지 확인 (웹 배포용)
-      const dartDefineEnv = String.fromEnvironment('ENVIRONMENT');
-      if (dartDefineEnv.isNotEmpty) {
-        // dart-define 환경 변수가 있으면 .env 파일 로딩 건너뛰기
-        if (kDebugMode) {
-          print('✅ dart-define 환경 변수 감지: $dartDefineEnv');
-        }
-        return;
-      }
-
-      // dart-define이 없는 경우에만 .env 파일 로딩 시도 (로컬 개발용)
-      if (kIsWeb && kReleaseMode) {
-        // 웹 릴리즈 빌드에서는 .env 파일 로딩을 건너뛰고 폴백 설정 사용
-        await _setHardcodedWebConfig();
-        return;
-      }
-
-      // Flutter 빌드 모드에 따라 환경 파일 선택
-      String envFile;
-      if (kReleaseMode) {
-        envFile = ".env.production";
-      } else if (kDebugMode) {
-        envFile = ".env.development";
-      } else {
-        envFile = ".env";
-      }
-
-      // 로컬 환경에서만 .env 파일 로딩 시도
-      if (kIsWeb) {
-        await _loadEnvironmentForWeb(envFile);
-      } else {
-        await dotenv.load(fileName: envFile);
-      }
-
-    } catch (e) {
-      // 폴백 로딩 시도
-      await _tryFallbackLoading();
+    // ignore: avoid_print
+    print('🚀 EnvironmentConfig.initialize() 시작');
+    
+    // dart-define 환경 변수 확인
+    const dartDefineEnv = String.fromEnvironment('ENVIRONMENT');
+    if (dartDefineEnv.isNotEmpty && kDebugMode) {
+      // ignore: avoid_print
+      print('✅ dart-define 환경 변수 감지: $dartDefineEnv');
+    }
+    
+    // ignore: avoid_print
+    print('📝 기본 환경 설정 적용 시작...');
+    // 기본 환경 설정 적용
+    _setDefaultConfig();
+    
+    // ignore: avoid_print
+    print('🔍 Supabase 설정 상태 확인 시작...');
+    // Supabase 설정 상태 확인 및 알림 (kDebugMode 조건 제거)
+    _logSupabaseStatus();
+    
+    // ignore: avoid_print
+    print('✅ EnvironmentConfig.initialize() 완료');
+  }
+  
+  /// Supabase 설정 상태 로깅 (개발 모드 전용)
+  static void _logSupabaseStatus() {
+    final url = supabaseUrl;
+    final key = supabaseAnonKey;
+    
+    // dart-define 직접 확인
+    const dartDefineUrl = String.fromEnvironment('SUPABASE_URL');
+    const dartDefineKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+    
+    // ignore: avoid_print
+    print('🔍 EnvironmentConfig - Supabase 설정 상태 검사:');
+    // ignore: avoid_print
+    print('   - dart-define SUPABASE_URL: ${dartDefineUrl.isNotEmpty ? "${dartDefineUrl.substring(0, 30)}..." : "미설정"}');
+    // ignore: avoid_print
+    print('   - dart-define SUPABASE_ANON_KEY: ${dartDefineKey.isNotEmpty ? "${dartDefineKey.substring(0, 20)}..." : "미설정"}');
+    // ignore: avoid_print
+    print('   - EnvironmentConfig.supabaseUrl getter: ${url != null ? "${url.substring(0, 30)}..." : "null"}');
+    // ignore: avoid_print
+    print('   - EnvironmentConfig.supabaseAnonKey getter: ${key != null ? "${key.substring(0, 20)}..." : "null"}');
+    
+    if (url != null && key != null) {
+      // ignore: avoid_print
+      print('🔗 EnvironmentConfig - Supabase 온라인 모드 활성화');
+    } else {
+      // ignore: avoid_print
+      print('📱 EnvironmentConfig - Supabase 오프라인 모드');
+      // ignore: avoid_print
+      print('   ❌ 온라인 랭킹 기능 비활성화');
     }
   }
 
-  /// 웹 플랫폼용 환경 로딩
-  static Future<void> _loadEnvironmentForWeb(String envFile) async {
-    // 웹 릴리즈 빌드에서는 .env 파일 로딩을 시도하지 않음
-    if (kReleaseMode) {
-      await _setHardcodedWebConfig();
-      return;
-    }
-
-    try {
-      await dotenv.load(fileName: envFile);
-    } catch (e) {
-      // 웹에서는 하드코딩된 설정으로 폴백
-      await _setHardcodedWebConfig();
-    }
-  }
-
-  /// 폴백 로딩 시도
-  static Future<void> _tryFallbackLoading() async {
-    // 웹 릴리즈 빌드에서는 바로 하드코딩된 설정 사용
-    if (kIsWeb && kReleaseMode) {
-      await _setHardcodedWebConfig();
-      return;
-    }
-
-    final fallbackFiles = [".env", ".env.development"];
-    bool loaded = false;
-
-    for (final fallbackFile in fallbackFiles) {
-      try {
-        if (kIsWeb) {
-          await _loadEnvironmentForWeb(fallbackFile);
-        } else {
-          await dotenv.load(fileName: fallbackFile);
-        }
-        loaded = true;
-        break;
-      } catch (fallbackError) {
-        // 폴백 파일 로딩 실패는 다음 파일로 시도
-      }
-    }
-
-    if (!loaded) {
-      if (kIsWeb) {
-        await _setHardcodedWebConfig();
-      }
-    }
-  }
-
-  /// 웹용 폴백 설정 (환경 파일 로딩 실패 시)
-  static Future<void> _setHardcodedWebConfig() async {
-    if (kDebugMode) {
-      print('⚠️ 환경 파일을 찾을 수 없어 폴백 설정을 사용합니다.');
-      print('ℹ️ .env 파일을 생성하고 Supabase 설정을 추가하세요.');
-    }
-
-    // 프로덕션인지 확인하여 적절한 설정 적용
+  /// 기본 환경 설정 적용
+  static void _setDefaultConfig() {
     final isProduction = kReleaseMode;
-
-    // 기본 환경 변수 설정 (민감한 정보는 제외)
-    dotenv.env.clear();
-    dotenv.env.addAll({
-      'ENVIRONMENT': isProduction ? 'production' : 'development',
-      'DEVELOPER_MODE_ENABLED': isProduction ? 'false' : 'true',
-      'DEBUG_INFO': isProduction ? 'false' : 'true',
-      'API_TIMEOUT': isProduction ? '5000' : '10000',
-      'MAX_RETRIES': isProduction ? '2' : '3',
-      // 주의: SUPABASE_URL과 SUPABASE_ANON_KEY는 .env 파일에서 설정해야 합니다
-    });
+    
+    // dart-define 전용으로 변경됨 - dotenv 사용하지 않음
+    // 모든 환경 변수는 dart-define 또는 기본값으로 처리
+    
+    // ignore: avoid_print
+    print('✅ 기본 환경 설정 적용 완료: ${isProduction ? "Production" : "Development"}');
   }
+
+
+
 
   /// 현재 환경이 로컬인지 확인
   static bool get isLocal {
-    // dart-define 환경 설정 우선 확인 (웹 배포용)
+    // dart-define 환경 설정만 사용 (flutter_dotenv 의존성 제거)
     const dartDefineEnv = String.fromEnvironment('ENVIRONMENT');
-    String environment = dartDefineEnv.isNotEmpty 
-        ? dartDefineEnv.toLowerCase() 
-        : (dotenv.env['ENVIRONMENT']?.toLowerCase() ?? '');
+    String environment = dartDefineEnv.isNotEmpty
+        ? dartDefineEnv.toLowerCase()
+        : '';
 
     // 명시적으로 production으로 설정된 경우 프로덕션으로 처리
     if (environment == 'production' ||
@@ -157,12 +114,13 @@ class EnvironmentConfig {
     // 디버그 모드가 아니면 false
     if (!kDebugMode) return false;
 
-    // dart-define 개발자 모드 설정 우선 확인 (웹 배포용)
-    const dartDefineDeveloperMode = String.fromEnvironment('DEVELOPER_MODE_ENABLED');
-    String developerMode = dartDefineDeveloperMode.isNotEmpty 
-        ? dartDefineDeveloperMode.toLowerCase() 
-        : (dotenv.env['DEVELOPER_MODE_ENABLED']?.toLowerCase() ?? 'false');
-        
+    // dart-define 개발자 모드 설정만 사용 (flutter_dotenv 의존성 제거)
+    const dartDefineDeveloperMode =
+        String.fromEnvironment('DEVELOPER_MODE_ENABLED');
+    String developerMode = dartDefineDeveloperMode.isNotEmpty
+        ? dartDefineDeveloperMode.toLowerCase()
+        : 'false';
+
     return developerMode == 'true' || developerMode == '1';
   }
 
@@ -175,54 +133,66 @@ class EnvironmentConfig {
   static bool get showDebugInfo {
     if (isProduction) return false;
 
-    // dart-define 디버그 정보 설정 우선 확인 (웹 배포용)
+    // dart-define 디버그 정보 설정만 사용 (flutter_dotenv 의존성 제거)
     const dartDefineDebugInfo = String.fromEnvironment('DEBUG_INFO');
-    String debugInfo = dartDefineDebugInfo.isNotEmpty 
-        ? dartDefineDebugInfo.toLowerCase() 
-        : (dotenv.env['DEBUG_INFO']?.toLowerCase() ?? 'false');
-        
+    String debugInfo = dartDefineDebugInfo.isNotEmpty
+        ? dartDefineDebugInfo.toLowerCase()
+        : 'false';
+
     return debugInfo == 'true' || debugInfo == '1';
   }
 
   /// API 타임아웃 (밀리초)
   static int get apiTimeout {
-    // dart-define API 타임아웃 설정 우선 확인 (웹 배포용)
+    // dart-define API 타임아웃 설정만 사용 (flutter_dotenv 의존성 제거)
     const dartDefineTimeout = String.fromEnvironment('API_TIMEOUT');
-    String timeout = dartDefineTimeout.isNotEmpty 
-        ? dartDefineTimeout 
-        : (dotenv.env['API_TIMEOUT'] ?? '5000');
-        
+    String timeout = dartDefineTimeout.isNotEmpty
+        ? dartDefineTimeout
+        : '5000';
+
     return int.tryParse(timeout) ?? 5000;
   }
 
   /// 최대 재시도 횟수
   static int get maxRetries {
-    // dart-define 최대 재시도 설정 우선 확인 (웹 배포용)
+    // dart-define 최대 재시도 설정만 사용 (flutter_dotenv 의존성 제거)
     const dartDefineRetries = String.fromEnvironment('MAX_RETRIES');
-    String retries = dartDefineRetries.isNotEmpty 
-        ? dartDefineRetries 
-        : (dotenv.env['MAX_RETRIES'] ?? '2');
-        
+    String retries = dartDefineRetries.isNotEmpty
+        ? dartDefineRetries
+        : '2';
+
     return int.tryParse(retries) ?? 2;
   }
 
-  /// Supabase URL (dart-define 우선, 그 다음 .env)
+  /// Supabase URL (dart-define에서만 가져옴)
   static String? get supabaseUrl {
-    // dart-define으로 주입된 값 우선 사용 (웹 배포용)
     const dartDefineUrl = String.fromEnvironment('SUPABASE_URL');
-    if (dartDefineUrl.isNotEmpty) return dartDefineUrl;
-    
-    // .env 파일의 값 사용 (로컬 개발용)
-    return dotenv.env['SUPABASE_URL'];
+    return dartDefineUrl.isNotEmpty ? dartDefineUrl : null;
   }
 
-  /// Supabase Anon Key (dart-define 우선, 그 다음 .env)
+  /// Supabase Anon Key (dart-define에서만 가져옴)
   static String? get supabaseAnonKey {
-    // dart-define으로 주입된 값 우선 사용 (웹 배포용)
     const dartDefineKey = String.fromEnvironment('SUPABASE_ANON_KEY');
-    if (dartDefineKey.isNotEmpty) return dartDefineKey;
+    return dartDefineKey.isNotEmpty ? dartDefineKey : null;
+  }
+
+  /// 환경에 따른 안전한 print 출력
+  /// 프로덕션 모드에서는 print 출력을 억제합니다.
+  static void debugPrint(Object? object) {
+    // 프로덕션 환경이거나 릴리즈 빌드에서는 print 출력 안함
+    if (isProduction || kReleaseMode) {
+      return;
+    }
     
-    // .env 파일의 값 사용 (로컬 개발용)
-    return dotenv.env['SUPABASE_ANON_KEY'];
+    // 개발 환경에서만 print 출력
+    // ignore: avoid_print
+    print(object);
+  }
+
+  /// 중요한 시스템 메시지용 print (프로덕션에서도 출력)
+  /// 오류나 중요한 시스템 상태 정보에만 사용
+  static void systemPrint(Object? object) {
+    // ignore: avoid_print
+    print(object);
   }
 }

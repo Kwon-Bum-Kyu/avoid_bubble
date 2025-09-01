@@ -20,30 +20,49 @@ void main() async {
   bool supabaseInitialized = false;
   
   try {
+    // 환경 설정 초기화
+    await EnvironmentConfig.initialize();
+    
+    if (kDebugMode) {
+      // 초기화 후 환경 상태 확인
+      final url = EnvironmentConfig.supabaseUrl;
+      final key = EnvironmentConfig.supabaseAnonKey;
+      // ignore: avoid_print
+      print('🔍 main.dart에서 확인된 환경 설정:');
+      // ignore: avoid_print
+      print('   - SUPABASE_URL: ${url != null ? "${url.substring(0, 30)}..." : "null"}');
+      // ignore: avoid_print
+      print('   - SUPABASE_ANON_KEY: ${key != null ? "${key.substring(0, 20)}..." : "null"}');
+    }
+    
     // 웹에서 더 안전한 초기화
     if (kIsWeb) {
-      // 웹에서는 타임아웃 설정
-      await Future.wait([
-        EnvironmentConfig.initialize(),
-      ]).timeout(const Duration(seconds: 10));
-      
       try {
-        await SupabaseConfig.initialize().timeout(const Duration(seconds: 5));
+        // ignore: avoid_print
+        print('🚀 Supabase 초기화 시작...');
+        await SupabaseConfig.initialize().timeout(const Duration(seconds: 10));
         supabaseInitialized = true;
+        // ignore: avoid_print
+        print('✅ Supabase 초기화 성공');
       } catch (e) {
+        // ignore: avoid_print
+        print('❌ Supabase 초기화 실패: $e');
         supabaseInitialized = false;
       }
     } else {
       // 네이티브 플랫폼
-      await EnvironmentConfig.initialize();
       await SupabaseConfig.initialize();
       supabaseInitialized = true;
     }
     
     } catch (e) {
+    // ignore: avoid_print
+    print('❌ 메인 초기화 오류: $e');
     supabaseInitialized = false;
   }
   
+  // ignore: avoid_print
+  print('🎮 앱 시작: ${supabaseInitialized ? "온라인 모드" : "오프라인 모드"}');
   runApp(MyApp(isOfflineMode: !supabaseInitialized));
 }
 

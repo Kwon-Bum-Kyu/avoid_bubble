@@ -14,9 +14,39 @@ cd "$(dirname "$0")/.."
 echo "📁 기존 빌드 파일 정리..."
 flutter clean
 
-# Flutter 웹 빌드
+# Flutter 웹 빌드 (dart-define 환경변수 포함)
 echo "🔨 Flutter 웹 릴리즈 빌드 중..."
-flutter build web --release
+
+# 환경변수 확인 및 빌드 옵션 설정
+BUILD_ARGS="--release"
+
+# 기본 환경변수 설정
+BUILD_ARGS="$BUILD_ARGS --dart-define=ENVIRONMENT=production"
+BUILD_ARGS="$BUILD_ARGS --dart-define=DEVELOPER_MODE_ENABLED=false"
+BUILD_ARGS="$BUILD_ARGS --dart-define=DEBUG_INFO=false"
+BUILD_ARGS="$BUILD_ARGS --dart-define=API_TIMEOUT=5000"
+BUILD_ARGS="$BUILD_ARGS --dart-define=MAX_RETRIES=2"
+
+# Supabase 설정 (환경변수로 제공된 경우)
+if [ ! -z "$SUPABASE_URL" ] && [ ! -z "$SUPABASE_ANON_KEY" ]; then
+    echo "🔗 Supabase 설정 감지됨"
+    BUILD_ARGS="$BUILD_ARGS --dart-define=SUPABASE_URL=$SUPABASE_URL"
+    BUILD_ARGS="$BUILD_ARGS --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+    echo "  - SUPABASE_URL: ${SUPABASE_URL:0:30}..."
+    echo "  - SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:0:20}..."
+else
+    echo "⚠️  Supabase 미설정 - 오프라인 모드로 빌드"
+    echo "   온라인 랭킹 기능이 비활성화됩니다."
+fi
+
+echo "📝 빌드 설정:"
+echo "  - 환경: Production"
+echo "  - 개발자 모드: 비활성화"
+echo "  - 디버그 정보: 비활성화"
+echo ""
+
+# 실제 빌드 실행
+flutter build web $BUILD_ARGS
 
 # 빌드 성공 확인
 if [ ! -d "build/web" ]; then
@@ -64,7 +94,14 @@ echo ""
 echo "🤖 Butler 자동 업로드:"
 echo "   butler push build/web username/game:web --userversion \"${TIMESTAMP}\""
 echo ""
+echo "🔧 Supabase와 함께 빌드하려면:"
+echo "   SUPABASE_URL=\"https://your-project.supabase.co\" \\"
+echo "   SUPABASE_ANON_KEY=\"your-anon-key\" \\"
+echo "   ./scripts/deploy-itch.sh"
+echo ""
 echo "💡 팁:"
+echo "   - 오프라인 모드: 환경변수 없이 실행"
+echo "   - 온라인 모드: SUPABASE_URL, SUPABASE_ANON_KEY 설정"
 echo "   - Butler 설정: ./scripts/setup-butler.sh"
 echo "   - CI/CD 가이드: docs/CICD_SETUP.md"
 echo ""

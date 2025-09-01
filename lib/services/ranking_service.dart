@@ -8,6 +8,14 @@ class RankingService {
   
   /// 새로운 랭킹 데이터 추가
   static Future<bool> addRanking(RankingModel ranking) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 랭킹 추가 건너뛰기');
+      }
+      return false;
+    }
+
     try {
       final response = await SupabaseConfig.client
           .from(_tableName)
@@ -15,11 +23,13 @@ class RankingService {
           .select();
       
       if (kDebugMode) {
+        print('✅ 랭킹 추가 성공: ${ranking.playerName} (${ranking.survivalTime}s)');
       }
       
       return response.isNotEmpty;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 랭킹 추가 실패: $e');
       }
       return false;
     }
@@ -33,6 +43,14 @@ class RankingService {
   
   /// 대체 방법: 클라이언트 사이드에서 중복 제거
   static Future<List<RankingModel>> _getTopRankingsFallback({int limit = 10}) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 빈 랭킹 목록 반환');
+      }
+      return [];
+    }
+
     try {
       // 더 많은 데이터를 가져와서 클라이언트에서 필터링
       final response = await SupabaseConfig.client
@@ -67,6 +85,7 @@ class RankingService {
       return rankings;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 랭킹 조회 실패: $e');
       }
       return [];
     }
@@ -74,6 +93,14 @@ class RankingService {
   
   /// 특정 플레이어의 최고 기록 조회
   static Future<RankingModel?> getPlayerBestRecord(String playerName) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 플레이어 기록 조회 불가');
+      }
+      return null;
+    }
+
     try {
       final response = await SupabaseConfig.client
           .from(_tableName)
@@ -88,6 +115,7 @@ class RankingService {
       return null;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 플레이어 최고 기록 조회 실패: $e');
       }
       return null;
     }
@@ -95,6 +123,14 @@ class RankingService {
   
   /// 특정 플레이어의 모든 기록 조회
   static Future<List<RankingModel>> getPlayerRecords(String playerName, {int limit = 50}) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 플레이어 기록 조회 불가');
+      }
+      return [];
+    }
+
     try {
       final response = await SupabaseConfig.client
           .from(_tableName)
@@ -106,6 +142,7 @@ class RankingService {
       return response.map<RankingModel>((data) => RankingModel.fromJson(data)).toList();
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 플레이어 기록 조회 실패: $e');
       }
       return [];
     }
@@ -129,6 +166,7 @@ class RankingService {
       return rank;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 내 순위 조회 실패: $e');
       }
       return 0;
     }
@@ -136,6 +174,14 @@ class RankingService {
 
   /// 전체 기록 수 조회
   static Future<int> getTotalRecords() async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 전체 기록 수 조회 불가');
+      }
+      return 0;
+    }
+
     try {
       final count = await SupabaseConfig.client
           .from(_tableName)
@@ -144,6 +190,7 @@ class RankingService {
       return count;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 전체 기록 수 조회 실패: $e');
       }
       return 0;
     }
@@ -151,6 +198,14 @@ class RankingService {
   
   /// 등급별 랭킹 조회
   static Future<List<RankingModel>> getRankingsByGrade(String grade, {int limit = 10}) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 등급별 랭킹 조회 불가');
+      }
+      return [];
+    }
+
     try {
       final response = await SupabaseConfig.client
           .from(_tableName)
@@ -169,6 +224,7 @@ class RankingService {
       return rankings;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 등급별 랭킹 조회 실패: $e');
       }
       return [];
     }
@@ -176,6 +232,14 @@ class RankingService {
   
   /// 오늘의 랭킹 조회 (플레이어당 최고 기록만)
   static Future<List<RankingModel>> getTodayRankings({int limit = 10}) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 오늘 랭킹 조회 불가');
+      }
+      return [];
+    }
+
     try {
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
@@ -213,6 +277,7 @@ class RankingService {
       return rankings;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 오늘 랭킹 조회 실패: $e');
       }
       return [];
     }
@@ -220,6 +285,14 @@ class RankingService {
   
   /// 닉네임 중복 검사
   static Future<bool> isNicknameAvailable(String nickname) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 닉네임 중복 검사 불가');
+      }
+      return true; // 오프라인에서는 사용 가능으로 처리
+    }
+
     try {
       final count = await SupabaseConfig.client
           .from(_tableName)
@@ -229,6 +302,7 @@ class RankingService {
       return count == 0;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 닉네임 중복 검사 실패: $e');
       }
       return false;
     }
@@ -236,6 +310,14 @@ class RankingService {
   
   /// 최고 기록인지 확인 (기존 기록과 비교)
   static Future<bool> isNewBestRecord(String playerName, double survivalTime) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 신기록 여부 확인 불가');
+      }
+      return false; // 오프라인 모드에서는 신기록 처리 안함
+    }
+
     try {
       final bestRecord = await getPlayerBestRecord(playerName);
       
@@ -248,6 +330,7 @@ class RankingService {
       return survivalTime > bestRecord.survivalTime;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 신기록 여부 확인 실패: $e');
       }
       return true; // 에러 시에는 기록 저장 허용
     }
@@ -255,12 +338,21 @@ class RankingService {
   
   /// 최고 기록일 때만 랭킹 추가
   static Future<bool> addRankingIfBest(RankingModel ranking) async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 랭킹 추가 건너뛰기');
+      }
+      return false;
+    }
+
     try {
       // 최고 기록인지 먼저 확인
       final isBest = await isNewBestRecord(ranking.playerName, ranking.survivalTime);
       
       if (!isBest) {
         if (kDebugMode) {
+          print('ℹ️ 기존 기록이 더 좋음 - 랭킹 추가 건너뜀');
         }
         return false;
       }
@@ -269,6 +361,7 @@ class RankingService {
       return await addRanking(ranking);
     } catch (e) {
       if (kDebugMode) {
+        print('❌ 최고 기록 랭킹 추가 실패: $e');
       }
       return false;
     }
@@ -276,6 +369,14 @@ class RankingService {
   
   /// 연결 테스트
   static Future<bool> testConnection() async {
+    // Supabase 초기화 확인
+    if (!SupabaseConfig.isInitialized) {
+      if (kDebugMode) {
+        print('⚠️ Supabase 미초기화 - 연결 테스트 불가');
+      }
+      return false;
+    }
+
     try {
       await SupabaseConfig.client
           .from(_tableName)
@@ -284,6 +385,7 @@ class RankingService {
       return true;
     } catch (e) {
       if (kDebugMode) {
+        print('❌ Supabase 연결 테스트 실패: $e');
       }
       return false;
     }

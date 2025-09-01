@@ -2,93 +2,104 @@ name: Deploy to itch.io
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number for the build'
+        description: "Version number for the build"
         required: false
-        default: ''
+        default: ""
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
 
-    - name: Get Flutter dependencies
-      run: flutter pub get
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
-    - name: Run Flutter analyze
-      run: flutter analyze --no-pub
+      - name: Run Flutter analyze
+        run: flutter analyze --no-pub
 
-    - name: Run tests
-      run: flutter test
+      - name: Run tests
+        run: flutter test
 
-    - name: Build web release
-      env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      run: |
-        flutter build web --release \
-          --dart-define=ENVIRONMENT=production \
-          --dart-define=DEVELOPER_MODE_ENABLED=false \
-          --dart-define=DEBUG_INFO=false \
-          --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
-          --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
-          --dart-define=API_TIMEOUT=5000 \
-          --dart-define=MAX_RETRIES=2
+      - name: Build web release
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build web --release \
+            --dart-define=ENVIRONMENT=production \
+            --dart-define=DEVELOPER_MODE_ENABLED=false \
+            --dart-define=DEBUG_INFO=false \
+            --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
+            --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
+            --dart-define=API_TIMEOUT=5000 \
+            --dart-define=MAX_RETRIES=2
 
-    - name: Setup Butler
-      run: |
-        curl -L -o butler.zip "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
-        unzip butler.zip
-        chmod +x butler
-        sudo mv butler /usr/local/bin/
+      - name: Setup Butler
+        run: |
+          curl -L -o butler.zip "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
+          unzip butler.zip
+          chmod +x butler
+          sudo mv butler /usr/local/bin/
 
-    - name: Verify Butler installation
-      run: butler -V
+      - name: Verify Butler installation
+        run: butler -V
 
-    - name: Set version number
-      id: version
-      run: |
-        if [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          # Tagged release
-          VERSION=${GITHUB_REF#refs/tags/}
-        elif [ "${{ github.event.inputs.version }}" != "" ]; then
-          # Manual workflow with version input
-          VERSION="${{ github.event.inputs.version }}"
-        else
-          # Auto-generated version from commit
-          VERSION="build-$(date +'%Y%m%d-%H%M')-${GITHUB_SHA:0:7}"
-        fi
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "Building version: $VERSION"
+      - name: Set version number
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Tagged release
+            VERSION=${GITHUB_REF#refs/tags/}
+          elif [ "${{ github.event.inputs.version }}" != "" ]; then
+            # Manual workflow with version input
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # Auto-generated version from commit
+            VERSION="build-$(date +'%Y%m%d-%H%M')-${GITHUB_SHA:0:7}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
 
-    - name: Deploy to itch.io
-      env:
-        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        ITCH_USER: ${{ secrets.ITCH_USER }}
-        ITCH_GAME: ${{ secrets.ITCH_GAME }}
-      run: |
-        butler push build/web $ITCH_USER/$ITCH_GAME:web --userversion "${{ steps.version.outputs.version }}"
+      - name: Deploy to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+        run: |
+          butler push build/web $ITCH_USER/$ITCH_GAME:web --userversion "${{ steps.version.outputs.version }}"
 
-    - name: Create deployment summary
-      run: |
-        echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
-        echo "**Game**: ${{ secrets.ITCH_USER }}/${{ secrets.ITCH_GAME }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Channel**: web" >> $GITHUB_STEP_SUMMARY
-        echo "**Build time**: $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "**Commit**: ${GITHUB_SHA:0:7}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "🎮 **Play now**: https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }}" >> $GITHUB_STEP_SUMMARY
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 itch.io 자동 배포 완료" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 배포 정보" >> $GITHUB_STEP_SUMMARY
+          echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎮 게임 | \`${{ secrets.ITCH_USER }}/${{ secrets.ITCH_GAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 버전 | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| $MODE_ICON 모드 | **$DEPLOY_MODE 모드** |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🕒 배포 시간 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📝 커밋 | \`${GITHUB_SHA:0:7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 게임 기능" >> $GITHUB_STEP_SUMMARY
+          echo -e "$FEATURES" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎮 플레이 링크" >> $GITHUB_STEP_SUMMARY
+          echo "**👉 [지금 플레이하기](https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }})**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*🤖 GitHub Actions로 자동 빌드 및 배포됨*" >> $GITHUB_STEP_SUMMARY

@@ -32,6 +32,7 @@ class AvoidBubbleGame extends FlameGame {
   // 생성자
   AvoidBubbleGame({required this.settings});
 
+
   // 무적 모드 여부 getter
   bool get isInvincible => settings.isInvincible;
 
@@ -72,12 +73,25 @@ class AvoidBubbleGame extends FlameGame {
     );
     add(player..priority = 1);
 
-    // 모바일 플랫폼(Android/iOS)에서만 조이스틱 추가
-    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || 
-                    defaultTargetPlatform == TargetPlatform.iOS)) {
+    // 모바일 앱 또는 웹(itch.io 모바일 지원용)에서 조이스틱 추가
+    final shouldShowJoystick = !kIsWeb && (
+      defaultTargetPlatform == TargetPlatform.android || 
+      defaultTargetPlatform == TargetPlatform.iOS
+    ) || kIsWeb; // 웹에서도 조이스틱 표시 (itch.io 모바일 지원)
+    
+    if (shouldShowJoystick) {
+      // 화면 크기에 따른 조이스틱 크기 조정
+      final screenWidth = size.x;
+      final screenHeight = size.y;
+      final isSmallScreen = screenWidth < 768 || screenHeight < 600;
+      
+      final backgroundRadius = isSmallScreen ? 50.0 : 60.0;
+      final knobRadius = isSmallScreen ? 20.0 : 25.0;
+      final margin = isSmallScreen ? 30.0 : 40.0;
+      
       // 조이스틱 배경 (반투명한 원)
       final background = CircleComponent(
-        radius: 60,
+        radius: backgroundRadius,
         paint: Paint()
           ..color = Colors.white.withValues(alpha: 0.2)
           ..style = PaintingStyle.fill,
@@ -85,7 +99,7 @@ class AvoidBubbleGame extends FlameGame {
       
       // 조이스틱 손잡이 (작은 원)
       final knob = CircleComponent(
-        radius: 25,
+        radius: knobRadius,
         paint: Paint()
           ..color = Colors.white.withValues(alpha: 0.6)
           ..style = PaintingStyle.fill,
@@ -95,20 +109,24 @@ class AvoidBubbleGame extends FlameGame {
       joystick = JoystickComponent(
         background: background,
         knob: knob,
-        margin: const EdgeInsets.only(left: 40, bottom: 40),
+        margin: EdgeInsets.only(left: margin, bottom: margin),
       );
       
       add(joystick!);
     }
 
-    // 생존 시간 텍스트 추가
+    // 생존 시간 텍스트 추가 (화면 크기에 따른 크기 조정)
+    final isSmallScreen = size.x < 768 || size.y < 600;
+    final fontSize = isSmallScreen ? 20.0 : 24.0;
+    final textPosition = Vector2(isSmallScreen ? 15 : 20, isSmallScreen ? 40 : 50);
+    
     timeText = TextComponent(
       text: 'Time: 0.0s',
-      position: Vector2(20, 50),
+      position: textPosition,
       textRenderer: TextPaint(
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 24,
+          fontSize: fontSize,
           fontFamily: 'NexonCart',
           shadows: [
             // 텍스트 가독성을 위한 그림자 효과
