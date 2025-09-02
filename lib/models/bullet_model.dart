@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../config/game_constants.dart';
 
 // 총알의 종류를 나타내는 enum
 enum BulletType {
@@ -24,12 +25,12 @@ class BulletModel {
   BulletModel({
     required this.startPosition,
     required this.direction,
-    this.speed = 100.0,
-    this.radius = 24.0,
+    this.speed = GameConstants.bulletSpeed,
+    this.radius = GameConstants.bulletRadius,
     this.type = BulletType.targeted,
-  }) : position = startPosition.clone(),
-       hasEnteredScreen = false,
-       isActive = true {
+  })  : position = startPosition.clone(),
+        hasEnteredScreen = false,
+        isActive = true {
     // 방향과 속도를 기반으로 속도 벡터 초기화
     if (direction.length > 0) {
       velocity = direction.normalized() * speed;

@@ -17,11 +17,13 @@
     <!-- Base href with dynamic handling for itch.io -->
     <script>
       // Set base href dynamically based on hosting environment
-      var baseHref = '/';
-      if (window.location.hostname.includes('itch.zone') || 
-          window.location.hostname.includes('itch.io') ||
-          window.location.protocol === 'file:') {
-        baseHref = './';
+      var baseHref = "/";
+      if (
+        window.location.hostname.includes("itch.zone") ||
+        window.location.hostname.includes("itch.io") ||
+        window.location.protocol === "file:"
+      ) {
+        baseHref = "./";
       }
       document.write('<base href="' + baseHref + '" />');
     </script>
@@ -82,12 +84,13 @@
             "
           >
             <div
+              id="progress-bar"
               style="
                 width: 0%;
                 height: 100%;
                 background: linear-gradient(90deg, #ff6b6b, #ffa500);
                 border-radius: 2px;
-                animation: loading 2s infinite ease-in-out;
+                transition: width 0.3s ease;
               "
             ></div>
           </div>
@@ -96,35 +99,96 @@
     </div>
 
     <style>
-      @keyframes loading {
-        0% {
-          width: 0%;
-        }
-        50% {
-          width: 70%;
-        }
-        100% {
-          width: 100%;
-        }
+      /* 로딩 화면 스타일 */
+      #loading {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
       }
     </style>
 
     <script>
-      // Hide loading screen when Flutter is ready
-      window.addEventListener("flutter-first-frame", function () {
-        const loading = document.querySelector("#loading");
-        if (loading) {
-          loading.remove();
+      // 로딩 진행 상태 관리
+      let loadingProgress = 0;
+      let loadingSteps = [
+        { progress: 20, message: "엔진 로딩중..." },
+        { progress: 40, message: "게임 리소스 준비중..." },
+        { progress: 60, message: "환경 설정 초기화중..." },
+        { progress: 80, message: "데이터베이스 연결중..." },
+        { progress: 95, message: "게임 시작 준비중..." },
+        { progress: 100, message: "완료!" },
+      ];
+      let currentStep = 0;
+
+      // 로딩 바 업데이트 함수
+      function updateProgress(progress, message) {
+        const progressBar = document.getElementById("progress-bar");
+        const loadingText = document.querySelector("#loading div:nth-child(2)");
+
+        if (progressBar) {
+          progressBar.style.width = progress + "%";
         }
+        if (loadingText && message) {
+          loadingText.textContent = message;
+        }
+      }
+
+      // 점진적 로딩 시뮬레이션
+      function simulateLoading() {
+        if (currentStep < loadingSteps.length) {
+          const step = loadingSteps[currentStep];
+          updateProgress(step.progress, step.message);
+          currentStep++;
+
+          // Flutter가 로드되기 전까지는 천천히 진행
+          const delay = currentStep < 3 ? 800 : 1500;
+          setTimeout(simulateLoading, delay);
+        }
+      }
+
+      // 로딩 시작
+      setTimeout(simulateLoading, 500);
+
+      // Flutter 첫 프레임이 렌더링되면 로딩 화면 제거 준비
+      let flutterReady = false;
+      let gameReady = false;
+
+      window.addEventListener("flutter-first-frame", function () {
+        flutterReady = true;
+        updateProgress(90, "게임 로딩 중...");
+        checkGameReady();
       });
 
-      // Fallback: hide loading screen after 10 seconds
-      setTimeout(function () {
-        const loading = document.querySelector("#loading");
-        if (loading) {
-          loading.remove();
+      // 게임이 실제로 준비되었을 때의 이벤트
+      window.addEventListener("gameReady", function () {
+        console.log("Game ready event received");
+        gameReady = true;
+        checkGameReady();
+      });
+
+      // Flutter와 게임이 모두 준비되었을 때 로딩 제거
+      function checkGameReady() {
+        if (flutterReady || gameReady) {
+          updateProgress(100, "게임 시작!");
+
+          setTimeout(function () {
+            const loading = document.querySelector("#loading");
+            if (loading) {
+              loading.style.opacity = "0";
+              loading.style.transition = "opacity 0.5s ease-out";
+              setTimeout(function () {
+                loading.remove();
+              }, 500);
+            }
+          }, 300);
         }
-      }, 10000);
+      }
+
+      // Flutter에서 호출
+      window.gameLoadingComplete = function () {
+        console.log("Game loading complete called from Flutter");
+        gameReady = true;
+        checkGameReady();
+      };
     </script>
 
     <script src="./flutter_bootstrap.js" async></script>
