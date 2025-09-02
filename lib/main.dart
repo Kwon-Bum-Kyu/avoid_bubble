@@ -17,7 +17,7 @@ import 'services/audio_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 웹 환경에서 안전한 orientation 처리 (itch.io 호환성)
   if (kIsWeb) {
     // 웹에서는 강제 orientation 설정을 하지 않음 (itch.io 모바일 호환성)
@@ -45,22 +45,24 @@ void main() async {
       if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패: $e');
     }
   }
-  
+
   bool supabaseInitialized = false;
-  
+
   try {
     // 환경 설정 초기화
     await EnvironmentConfig.initialize();
-    
+
     if (kDebugMode) {
       // 초기화 후 환경 상태 확인
       final url = EnvironmentConfig.supabaseUrl;
       final key = EnvironmentConfig.supabaseAnonKey;
       debugPrint('🔍 main.dart에서 확인된 환경 설정:');
-      debugPrint('   - SUPABASE_URL: ${url != null ? "${url.substring(0, 30)}..." : "null"}');
-      debugPrint('   - SUPABASE_ANON_KEY: ${key != null ? "${key.substring(0, 20)}..." : "null"}');
+      debugPrint(
+          '   - SUPABASE_URL: ${url != null ? "${url.substring(0, 30)}..." : "null"}');
+      debugPrint(
+          '   - SUPABASE_ANON_KEY: ${key != null ? "${key.substring(0, 20)}..." : "null"}');
     }
-    
+
     // 웹에서 더 안전한 초기화
     if (kIsWeb) {
       try {
@@ -77,19 +79,20 @@ void main() async {
       await SupabaseConfig.initialize();
       supabaseInitialized = true;
     }
-    
-    } catch (e) {
+  } catch (e) {
     if (!kReleaseMode) debugPrint('❌ 메인 초기화 오류: $e');
     supabaseInitialized = false;
   }
-  
-  if (!kReleaseMode) debugPrint('🎮 앱 시작: ${supabaseInitialized ? "온라인 모드" : "오프라인 모드"}');
+
+  if (!kReleaseMode) {
+    debugPrint('🎮 앱 시작: ${supabaseInitialized ? "온라인 모드" : "오프라인 모드"}');
+  }
   runApp(MyApp(isOfflineMode: !supabaseInitialized));
 }
 
 class MyApp extends StatelessWidget {
   final bool isOfflineMode;
-  
+
   const MyApp({super.key, this.isOfflineMode = false});
 
   @override
@@ -105,7 +108,7 @@ class MyApp extends StatelessWidget {
 
 class GameWrapper extends StatefulWidget {
   final bool isOfflineMode;
-  
+
   const GameWrapper({super.key, this.isOfflineMode = false});
 
   @override
@@ -124,19 +127,38 @@ class GameWrapperState extends State<GameWrapper> {
     super.initState();
     _initializeGame();
   }
-  
+
   Future<void> _initializeGame() async {
     try {
       await _loadStats();
       _createNewGame();
-      
+
       setState(() {
         _isLoading = false;
       });
-      } catch (e) {
+
+      // 웹에서 로딩 완료 신호 전송
+      if (kIsWeb) {
+        _notifyLoadingComplete();
+      }
+    } catch (e) {
       setState(() {
         _isLoading = false;
       });
+
+      // 오류가 발생해도 로딩 완료 신호 전송
+      if (kIsWeb) {
+        _notifyLoadingComplete();
+      }
+    }
+  }
+
+  // 웹 로딩 완료 알림
+  void _notifyLoadingComplete() {
+    if (kIsWeb) {
+      // Flutter Web에서 JavaScript로 게임 준비 신호 전송
+      // flutter-first-frame 이벤트와 함께 자동으로 처리됨
+      if (!kReleaseMode) debugPrint('🎮 게임 초기화 완료');
     }
   }
 
@@ -162,14 +184,15 @@ class GameWrapperState extends State<GameWrapper> {
   void _startGame() {
     // 새로운 게임 인스턴스를 생성하여 완전히 초기화
     _createNewGame();
-    
+
     setState(() {
       _currentState = GameState.playing;
     });
   }
 
   void _showGameOver() {
-    _stats?.recordGame(game.survivalTime, 'F', 0); // Grade and bullets avoided are not implemented yet
+    _stats?.recordGame(game.survivalTime, 'F',
+        0); // Grade and bullets avoided are not implemented yet
     setState(() {
       _currentState = GameState.gameOver;
     });
@@ -178,7 +201,7 @@ class GameWrapperState extends State<GameWrapper> {
   void _restartGame() {
     // 새로운 게임 인스턴스를 생성하여 완전히 초기화
     _createNewGame();
-    
+
     setState(() {
       _currentState = GameState.playing;
     });
@@ -187,7 +210,7 @@ class GameWrapperState extends State<GameWrapper> {
   void _showSettings() {
     // 설정 화면으로 이동할 때 BGM 정지
     AudioService.instance.stopBgm();
-    
+
     setState(() {
       _currentState = GameState.settings;
     });
@@ -205,7 +228,7 @@ class GameWrapperState extends State<GameWrapper> {
   void _backToStart() {
     // 메인 메뉴로 돌아갈 때 BGM 정지
     AudioService.instance.stopBgm();
-    
+
     setState(() {
       _currentState = GameState.startScreen;
       _createNewGame(); // Create new game instance
@@ -215,7 +238,7 @@ class GameWrapperState extends State<GameWrapper> {
   void _showRanking() {
     // 랭킹 화면으로 이동할 때 BGM 정지
     AudioService.instance.stopBgm();
-    
+
     setState(() {
       _currentState = GameState.ranking;
     });
@@ -223,34 +246,26 @@ class GameWrapperState extends State<GameWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    
     if (_isLoading || _stats == null) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/background.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+      return const Scaffold(
+        backgroundColor: Color(0xFF1a1a1a),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Loading Game...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontFamily: 'NexonCart',
                 ),
-                SizedBox(height: 20),
-                Text(
-                  'Loading Game...',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -272,7 +287,7 @@ class GameWrapperState extends State<GameWrapper> {
         );
       case GameState.playing:
         return GameScreen(
-          game: game, 
+          game: game,
           onBackToStart: _backToStart,
           onRestart: _restartGame,
         );
@@ -359,7 +374,7 @@ class GameScreenState extends State<GameScreen> {
       y = 1;
     }
 
-    // R키 재시작 기능 
+    // R키 재시작 기능
     if (_keysPressed.contains(LogicalKeyboardKey.keyR)) {
       widget.onRestart?.call();
     }
@@ -406,13 +421,15 @@ class GameScreenState extends State<GameScreen> {
                     onTap: () {
                       widget.onBackToStart();
                     },
-                    borderRadius: BorderRadius.circular(GameConstants.gameButtonSize / 2),
+                    borderRadius:
+                        BorderRadius.circular(GameConstants.gameButtonSize / 2),
                     child: Container(
                       width: GameConstants.gameButtonSize,
                       height: GameConstants.gameButtonSize,
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(GameConstants.gameButtonSize / 2),
+                        borderRadius: BorderRadius.circular(
+                            GameConstants.gameButtonSize / 2),
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       child: const Icon(

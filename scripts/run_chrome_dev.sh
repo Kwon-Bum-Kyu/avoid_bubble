@@ -34,7 +34,7 @@ for env_file in "${ENV_FILES[@]}"; do
         
         # 값이 모두 찾아졌으면 더 이상 검사하지 않음
         if [ ! -z "$SUPABASE_URL" ] && [ ! -z "$SUPABASE_ANON_KEY" ]; then
-            echo "  ✅ $env_file에서 Supabase 설정 로드됨"
+            echo "  ✅ $env_file 에서 Supabase 설정 로드됨"
             break
         fi
     fi
