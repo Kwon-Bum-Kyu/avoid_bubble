@@ -18,6 +18,34 @@ import 'services/audio_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // 웹 환경에서 안전한 orientation 처리 (itch.io 호환성)
+  if (kIsWeb) {
+    // 웹에서는 강제 orientation 설정을 하지 않음 (itch.io 모바일 호환성)
+    try {
+      // 가능하면 landscape를 선호하지만 실패해도 무시
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    } catch (e) {
+      // itch.io나 다른 환경에서 orientation 설정이 실패해도 계속 진행
+      if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패 (무시됨): $e');
+    }
+  } else {
+    // 네이티브 앱에서는 landscape 우선 설정
+    try {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.portraitUp,
+      ]);
+    } catch (e) {
+      if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패: $e');
+    }
+  }
+  
   bool supabaseInitialized = false;
   
   try {
