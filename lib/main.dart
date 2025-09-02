@@ -12,6 +12,7 @@ import 'screens/game_over_screen.dart';
 import 'screens/ranking_screen.dart';
 import 'config/environment_config.dart';
 import 'config/supabase_config.dart';
+import 'config/game_constants.dart';
 import 'services/audio_service.dart';
 
 void main() async {
@@ -369,21 +370,21 @@ class GameScreenState extends State<GameScreen> {
 
               // Home button (맨 위에 위치하여 다른 요소들에 가려지지 않도록)
               Positioned(
-                top: 40,
-                right: 20,
+                top: GameConstants.gameScreenPadding * 2,
+                right: GameConstants.gameScreenPadding,
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
                       widget.onBackToStart();
                     },
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(GameConstants.gameButtonSize / 2),
                     child: Container(
-                      width: 50,
-                      height: 50,
+                      width: GameConstants.gameButtonSize,
+                      height: GameConstants.gameButtonSize,
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(GameConstants.gameButtonSize / 2),
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       child: const Icon(

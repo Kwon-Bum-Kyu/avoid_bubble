@@ -1,4 +1,5 @@
 import '../config/environment_config.dart';
+import '../config/game_constants.dart';
 
 class GameSettings {
   // 게임 난이도
@@ -20,14 +21,15 @@ class GameSettings {
 
   // 생성자
   GameSettings({
-    this.bulletSpeed = 100.0,
-    this.playerSpeed = 300.0,
-    this.playerCollisionRadius = 10.0, // 기본값: 플레이어 충돌 범위 고정값
-    this.isInvincible = false,
+    this.bulletSpeed = GameConstants.bulletSpeed,
+    this.playerSpeed = GameConstants.playerSpeed,
+    this.playerCollisionRadius = GameConstants
+        .playerCollisionRadiusDefault, // 기본값: 플레이어 충돌 범위 고정값 (더 이상 사용되지 않음)
+    this.isInvincible = GameConstants.isInvincibleDefault,
     PatternTimings? patternTimings,
     this.soundEnabled = true,
-    this.soundVolume = 0.5,
-    this.showHitboxes = false,
+    this.soundVolume = GameConstants.volumeDefault,
+    this.showHitboxes = GameConstants.showHitboxesDefault,
     this.reducedMotion = false,
   }) : patternTimings = patternTimings ?? PatternTimings();
 
@@ -78,11 +80,22 @@ class GameSettings {
     }
 
     return GameSettings(
-      isInvincible: true,
-      showHitboxes: true,
-      bulletSpeed: 100.0,
-      playerSpeed: 400.0,
-      playerCollisionRadius: 10.0, // 플레이어 충돌 범위 고정값
+      isInvincible: DebugConstants.isInvincible,
+      showHitboxes: DebugConstants.showHitboxes,
+      bulletSpeed: DebugConstants.bulletSpeed,
+      playerSpeed: DebugConstants.playerSpeed,
+      playerCollisionRadius: GameConstants
+          .playerCollisionRadiusDefault, // 플레이어 충돌 범위 고정값 (더 이상 사용되지 않음)
+      patternTimings: PatternTimings(
+        pattern1StartTime: DebugConstants.pattern1StartTime,
+        pattern1EndTime: DebugConstants.pattern1EndTime,
+        pattern1Interval: DebugConstants.pattern1Interval,
+        pattern1FastInterval: DebugConstants.pattern1FastInterval,
+        pattern2StartTime: DebugConstants.pattern2StartTime,
+        pattern2Interval: DebugConstants.pattern2Interval,
+        pattern3StartTime: DebugConstants.pattern3StartTime,
+        pattern3Interval: DebugConstants.pattern3Interval,
+      ),
     );
   }
 
@@ -112,14 +125,14 @@ class PatternTimings {
 
   // 생성자
   PatternTimings({
-    this.pattern1StartTime = 2.0,
-    this.pattern1EndTime = 15.0,
-    this.pattern1Interval = 1.0,
-    this.pattern1FastInterval = 0.8,
-    this.pattern2StartTime = 15.0,
-    this.pattern2Interval = 5.0,
-    this.pattern3StartTime = 30.0,
-    this.pattern3Interval = 10.0,
+    this.pattern1StartTime = GameConstants.pattern1StartTimeDefault,
+    this.pattern1EndTime = GameConstants.pattern1EndTimeDefault,
+    this.pattern1Interval = GameConstants.pattern1IntervalDefault,
+    this.pattern1FastInterval = GameConstants.pattern1FastIntervalDefault,
+    this.pattern2StartTime = GameConstants.pattern2StartTimeDefault,
+    this.pattern2Interval = GameConstants.pattern2IntervalDefault,
+    this.pattern3StartTime = GameConstants.pattern3StartTimeDefault,
+    this.pattern3Interval = GameConstants.pattern3IntervalDefault,
   });
 
   // 현재 타이밍을 복사하여 새로운 인스턴스를 만드는 메서드

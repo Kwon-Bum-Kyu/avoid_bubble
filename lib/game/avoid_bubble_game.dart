@@ -65,10 +65,8 @@ class AvoidBubbleGame extends FlameGame {
         ..priority = 0,
     );
 
-    // 플레이어 추가
-    player = Player(
-        speed: settings.playerSpeed,
-        collisionRadius: settings.playerCollisionRadius);
+    // 플레이어 추가 (기본 fireChar 스킨 사용)
+    player = Player(speed: settings.playerSpeed);
     add(player..priority = 1);
 
     // 모바일 플랫폼(Android/iOS)에서만 조이스틱 추가
