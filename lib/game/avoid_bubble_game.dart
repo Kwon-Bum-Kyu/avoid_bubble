@@ -25,13 +25,12 @@ class AvoidBubbleGame extends FlameGame {
   bool isGameOver = false; // 게임 오버 상태
   final Random random = Random(); // 랜덤 숫자 생성기
   VoidCallback? onGameOver; // 게임 오버 시 호출될 콜백
-  
+
   // 모바일용 조이스틱 (웹에서는 null)
   JoystickComponent? joystick;
 
   // 생성자
   AvoidBubbleGame({required this.settings});
-
 
   // 무적 모드 여부 getter
   bool get isInvincible => settings.isInvincible;
@@ -68,65 +67,48 @@ class AvoidBubbleGame extends FlameGame {
 
     // 플레이어 추가
     player = Player(
-      speed: settings.playerSpeed,
-      collisionRadius: settings.playerCollisionRadius
-    );
+        speed: settings.playerSpeed,
+        collisionRadius: settings.playerCollisionRadius);
     add(player..priority = 1);
 
-    // 모바일 앱 또는 웹(itch.io 모바일 지원용)에서 조이스틱 추가
-    final shouldShowJoystick = !kIsWeb && (
-      defaultTargetPlatform == TargetPlatform.android || 
-      defaultTargetPlatform == TargetPlatform.iOS
-    ) || kIsWeb; // 웹에서도 조이스틱 표시 (itch.io 모바일 지원)
-    
-    if (shouldShowJoystick) {
-      // 화면 크기에 따른 조이스틱 크기 조정
-      final screenWidth = size.x;
-      final screenHeight = size.y;
-      final isSmallScreen = screenWidth < 768 || screenHeight < 600;
-      
-      final backgroundRadius = isSmallScreen ? 50.0 : 60.0;
-      final knobRadius = isSmallScreen ? 20.0 : 25.0;
-      final margin = isSmallScreen ? 30.0 : 40.0;
-      
+    // 모바일 플랫폼(Android/iOS)에서만 조이스틱 추가
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
       // 조이스틱 배경 (반투명한 원)
       final background = CircleComponent(
-        radius: backgroundRadius,
+        radius: 60,
         paint: Paint()
           ..color = Colors.white.withValues(alpha: 0.2)
           ..style = PaintingStyle.fill,
       );
-      
+
       // 조이스틱 손잡이 (작은 원)
       final knob = CircleComponent(
-        radius: knobRadius,
+        radius: 25,
         paint: Paint()
           ..color = Colors.white.withValues(alpha: 0.6)
           ..style = PaintingStyle.fill,
       );
-      
+
       // 조이스틱 컴포넌트 생성
       joystick = JoystickComponent(
         background: background,
         knob: knob,
-        margin: EdgeInsets.only(left: margin, bottom: margin),
+        margin: const EdgeInsets.only(left: 40, bottom: 40),
       );
-      
+
       add(joystick!);
     }
 
-    // 생존 시간 텍스트 추가 (화면 크기에 따른 크기 조정)
-    final isSmallScreen = size.x < 768 || size.y < 600;
-    final fontSize = isSmallScreen ? 20.0 : 24.0;
-    final textPosition = Vector2(isSmallScreen ? 15 : 20, isSmallScreen ? 40 : 50);
-    
+    // 생존 시간 텍스트 추가
     timeText = TextComponent(
       text: 'Time: 0.0s',
-      position: textPosition,
+      position: Vector2(20, 50),
       textRenderer: TextPaint(
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
-          fontSize: fontSize,
+          fontSize: 24,
           fontFamily: 'NexonCart',
           shadows: [
             // 텍스트 가독성을 위한 그림자 효과
@@ -159,8 +141,7 @@ class AvoidBubbleGame extends FlameGame {
 
     // BGM 시작 (파일이 없어도 게임은 정상 진행)
     if (settings.soundEnabled) {
-      AudioService.instance.playBgm('bgm.wav').catchError((error) {
-      });
+      AudioService.instance.playBgm('bgm.wav').catchError((error) {});
     }
   }
 
@@ -429,10 +410,10 @@ class AvoidBubbleGame extends FlameGame {
   void gameOver() {
     if (isGameOver) return;
     isGameOver = true;
-    
+
     // BGM 정지
     AudioService.instance.stopBgm();
-    
+
     onGameOver?.call(); // 게임 오버 콜백 호출
   }
 
@@ -444,20 +425,19 @@ class AvoidBubbleGame extends FlameGame {
     lastPattern2Spawn = 0.0;
     lastPattern3Spawn = 0.0;
     pattern3Direction = 0;
-    
+
     // 모든 총알 제거
     children.whereType<Bullet>().forEach((bullet) => bullet.removeFromParent());
-    
+
     // 플레이어가 초기화되어 있으면 위치 리셋
     try {
       if (isLoaded) {
         player.model.resetToCenter(size);
         timeText.text = 'Time: 0.0s';
-        
+
         // BGM 재시작 (파일이 없어도 게임은 정상 진행)
         if (settings.soundEnabled) {
-          AudioService.instance.playBgm('bgm.wav').catchError((error) {
-          });
+          AudioService.instance.playBgm('bgm.wav').catchError((error) {});
         }
       }
     } catch (e) {
@@ -465,12 +445,10 @@ class AvoidBubbleGame extends FlameGame {
     }
   }
 
-  
-
   void toggleHitboxes() {
     // 개발자 모드에서만 히트박스 토글 가능
     if (GameSettings.isDeveloperModeAvailable) {
-      // GameSettings를 직접 수정할 수 없으므로, 
+      // GameSettings를 직접 수정할 수 없으므로,
       // 임시로 showHitboxes 상태를 추적하는 방법 사용
       _showHitboxesOverride = !(_showHitboxesOverride ?? settings.showHitboxes);
     }
@@ -488,7 +466,4 @@ class AvoidBubbleGame extends FlameGame {
       player.setMovement(x, y);
     }
   }
-
-
-  
 }
