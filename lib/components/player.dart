@@ -11,8 +11,9 @@ class Player extends SpriteAnimationComponent
   // 플레이어의 데이터와 로직을 관리하는 모델
   late PlayerModel model;
   // 걷기, 멈춤 애니메이션
-  late SpriteAnimation _walkAnimation;
-  late SpriteAnimation _idleAnimation;
+  SpriteAnimation? _walkAnimation;
+  SpriteAnimation? _idleAnimation;
+  bool _animationsLoaded = false;
 
   // 생성자: 플레이어의 속도와 스킨을 초기화합니다.
   Player(
@@ -55,6 +56,9 @@ class Player extends SpriteAnimationComponent
     model.resetToCenter(game.size);
     position = model.position;
     anchor = Anchor.center; // 앵커를 중심으로 설정하여 위치를 정확하게 맞춤
+
+    // 애니메이션 로딩 완료 표시
+    _animationsLoaded = true;
   }
 
   @override
@@ -63,6 +67,9 @@ class Player extends SpriteAnimationComponent
     // 모델의 위치를 업데이트하고 컴포넌트 위치와 동기화
     model.updatePosition(dt, game.size);
     position = model.position;
+
+    // 매 프레임마다 애니메이션 상태 확인
+    _updateAnimation();
   }
 
   @override
@@ -102,11 +109,29 @@ class Player extends SpriteAnimationComponent
   // 외부에서 플레이어의 움직임을 설정하는 메서드
   void setMovement(double x, double y) {
     model.setMovement(x, y);
-    // 움직임 여부에 따라 애니메이션을 변경
-    if (x != 0 || y != 0) {
-      animation = _walkAnimation; // 움직이면 걷기 애니메이션
+
+    // 애니메이션 업데이트
+    _updateAnimation();
+  }
+
+  // 애니메이션 업데이트 로직 분리
+  void _updateAnimation() {
+    if (!_animationsLoaded ||
+        _walkAnimation == null ||
+        _idleAnimation == null) {
+      return; // 애니메이션이 로드되지 않았으면 무시
+    }
+
+    // 모델의 velocity 기준으로 애니메이션 결정
+    if (model.velocity.length > 0.1) {
+      // 작은 오차 무시
+      if (animation != _walkAnimation) {
+        animation = _walkAnimation;
+      }
     } else {
-      animation = _idleAnimation; // 멈추면 정지 애니메이션
+      if (animation != _idleAnimation) {
+        animation = _idleAnimation;
+      }
     }
   }
 
@@ -178,6 +203,7 @@ class Player extends SpriteAnimationComponent
     size = model.renderSize;
 
     // 현재 애니메이션 상태 유지
+    _animationsLoaded = true;
     if (model.velocity.length > 0) {
       animation = _walkAnimation;
     } else {

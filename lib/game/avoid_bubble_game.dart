@@ -9,6 +9,9 @@ import '../models/game_settings.dart';
 import '../models/bullet_model.dart';
 import '../services/audio_service.dart';
 
+// Web에서만 사용할 조건부 import
+import 'dart:js' as js;
+
 // 게임의 핵심 로직을 담고 있는 메인 클래스
 class AvoidBubbleGame extends FlameGame {
   final GameSettings settings; // 게임 설정값
@@ -26,7 +29,7 @@ class AvoidBubbleGame extends FlameGame {
   final Random random = Random(); // 랜덤 숫자 생성기
   VoidCallback? onGameOver; // 게임 오버 시 호출될 콜백
 
-  // 모바일용 조이스틱 (웹에서는 null)
+  // 모바일용 조이스틱 (데스크톱에서는 null)
   JoystickComponent? joystick;
 
   // 생성자
@@ -34,6 +37,55 @@ class AvoidBubbleGame extends FlameGame {
 
   // 무적 모드 여부 getter
   bool get isInvincible => settings.isInvincible;
+
+  // 웹에서 모바일 디바이스인지 확인 (user-agent 기반)
+  bool get _isMobileDevice {
+    if (kIsWeb) {
+      // JavaScript interop을 통해 user-agent 확인
+      return _checkMobileUserAgent();
+    } else {
+      return defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS;
+    }
+  }
+  
+  // User-agent 기반 모바일 디바이스 감지 (사이즈 무관)
+  bool _checkMobileUserAgent() {
+    try {
+      // HTML의 JavaScript에서 user-agent 기반으로 감지된 결과 사용
+      // 화면 크기는 고려하지 않고 순수하게 user-agent만으로 판단
+      
+      if (kDebugMode) {
+        debugPrint('🔍 Mobile detection - Using JavaScript user-agent detection');
+        debugPrint('📱 Screen size ignored: ${size.x.toInt()}x${size.y.toInt()} (user-agent only)');
+      }
+      
+      // JavaScript에서 설정한 IS_MOBILE_DEVICE 전역 변수 읽기
+      if (kIsWeb) {
+        try {
+          // dart:js를 사용하여 window.IS_MOBILE_DEVICE 값을 읽어옴
+          final jsContext = js.context;
+          final isMobile = jsContext['IS_MOBILE_DEVICE'];
+          final result = isMobile == true;
+          
+          if (kDebugMode) {
+            debugPrint('🌐 JavaScript IS_MOBILE_DEVICE: $isMobile → $result');
+          }
+          
+          return result;
+        } catch (e) {
+          if (kDebugMode) debugPrint('⚠️ JavaScript interop error: $e, falling back to false');
+          return false;
+        }
+      }
+      
+      return false;
+    } catch (e) {
+      // fallback: 오류 시 데스크톱으로 간주
+      if (kDebugMode) debugPrint('⚠️ Mobile detection error: $e (defaulting to desktop)');
+      return false;
+    }
+  }
 
   @override
   Future<void> onLoad() async {
@@ -69,34 +121,9 @@ class AvoidBubbleGame extends FlameGame {
     player = Player(speed: settings.playerSpeed);
     add(player..priority = 1);
 
-    // 모바일 플랫폼(Android/iOS)에서만 조이스틱 추가
-    if (!kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.android ||
-            defaultTargetPlatform == TargetPlatform.iOS)) {
-      // 조이스틱 배경 (반투명한 원)
-      final background = CircleComponent(
-        radius: 60,
-        paint: Paint()
-          ..color = Colors.white.withValues(alpha: 0.2)
-          ..style = PaintingStyle.fill,
-      );
-
-      // 조이스틱 손잡이 (작은 원)
-      final knob = CircleComponent(
-        radius: 25,
-        paint: Paint()
-          ..color = Colors.white.withValues(alpha: 0.6)
-          ..style = PaintingStyle.fill,
-      );
-
-      // 조이스틱 컴포넌트 생성
-      joystick = JoystickComponent(
-        background: background,
-        knob: knob,
-        margin: const EdgeInsets.only(left: 40, bottom: 40),
-      );
-
-      add(joystick!);
+    // 모바일 디바이스(네이티브 앱 + 웹 모바일)에서 조이스틱 추가
+    if (_isMobileDevice) {
+      _addJoystick();
     }
 
     // 생존 시간 텍스트 추가
@@ -394,11 +421,15 @@ class AvoidBubbleGame extends FlameGame {
       // 조이스틱 입력 처리 (모바일에서만)
       if (joystick != null) {
         if (!joystick!.delta.isZero()) {
-          // 조이스틱이 움직이고 있으면 해당 방향으로 플레이어 이동
-          player.setMovement(joystick!.delta.x, joystick!.delta.y);
+          // 조이스틱 델타 값을 정규화된 방향값(-1~1)으로 변환
+          final normalizedX = joystick!.delta.x.clamp(-1.0, 1.0);
+          final normalizedY = joystick!.delta.y.clamp(-1.0, 1.0);
+          
+          // 키보드와 동일한 방식으로 방향값 전달
+          setPlayerMovement(normalizedX, normalizedY);
         } else {
           // 조이스틱이 중앙에 있으면 플레이어 정지
-          player.setMovement(0, 0);
+          setPlayerMovement(0, 0);
         }
       }
     }
@@ -463,5 +494,54 @@ class AvoidBubbleGame extends FlameGame {
     if (!isGameOver) {
       player.setMovement(x, y);
     }
+  }
+
+  // 게임 화면 크기 변경 시 호출 (웹에서 모바일 감지를 위해)
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    _updateJoystickVisibility();
+  }
+
+  // 조이스틱 표시 상태 업데이트
+  void _updateJoystickVisibility() {
+    final shouldShowJoystick = _isMobileDevice;
+
+    if (shouldShowJoystick && joystick == null) {
+      // 조이스틱이 없는데 모바일이면 추가
+      _addJoystick();
+    } else if (!shouldShowJoystick && joystick != null) {
+      // 조이스틱이 있는데 데스크톱이면 제거
+      joystick!.removeFromParent();
+      joystick = null;
+    }
+  }
+
+  // 조이스틱 추가 (중복 코드 방지용)
+  void _addJoystick() {
+    // 조이스틱 배경 (반투명한 원)
+    final background = CircleComponent(
+      radius: 60,
+      paint: Paint()
+        ..color = Colors.white.withValues(alpha: 0.2)
+        ..style = PaintingStyle.fill,
+    );
+
+    // 조이스틱 손잡이 (작은 원)
+    final knob = CircleComponent(
+      radius: 20,
+      paint: Paint()
+        ..color = Colors.white.withValues(alpha: 0.6)
+        ..style = PaintingStyle.fill,
+    );
+
+    // 조이스틱 컴포넌트 생성
+    joystick = JoystickComponent(
+      background: background,
+      knob: knob,
+      margin: const EdgeInsets.only(left: 40, bottom: 40),
+    );
+
+    add(joystick!..priority = 100); // 다른 UI 요소보다 위에 표시
   }
 }
