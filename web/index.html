@@ -189,6 +189,30 @@
         gameReady = true;
         checkGameReady();
       };
+
+      // 모바일 디바이스 감지 함수
+      window.isMobileDevice = function() {
+        const userAgent = navigator.userAgent;
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|tablet/i.test(userAgent);
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        console.log('🔍 Mobile detection - User Agent:', userAgent);
+        console.log('📱 Mobile patterns found:', isMobile, 'Touch device:', isTouchDevice);
+        
+        return isMobile || isTouchDevice;
+      };
+      
+      // Flutter가 로드되면 모바일 여부를 전역 변수로 설정
+      window.IS_MOBILE_DEVICE = window.isMobileDevice();
+      
+      // body 태그에 모바일 클래스 추가 (Flutter에서 CSS로 감지 가능)
+      if (window.IS_MOBILE_DEVICE) {
+        document.body.classList.add('mobile-device');
+        console.log('📱 Mobile device detected - added mobile-device class');
+      } else {
+        document.body.classList.add('desktop-device');
+        console.log('💻 Desktop device detected - added desktop-device class');
+      }
     </script>
 
     <script src="./flutter_bootstrap.js" async></script>
