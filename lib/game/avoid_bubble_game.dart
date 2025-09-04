@@ -80,9 +80,10 @@ class AvoidBubbleGame extends FlameGame {
 
           return result;
         } catch (e) {
-          if (kDebugMode)
+          if (kDebugMode) {
             debugPrint(
                 '⚠️ JavaScript interop error: $e, falling back to false');
+          }
           return false;
         }
       }
@@ -90,8 +91,9 @@ class AvoidBubbleGame extends FlameGame {
       return false;
     } catch (e) {
       // fallback: 오류 시 데스크톱으로 간주
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('⚠️ Mobile detection error: $e (defaulting to desktop)');
+      }
       return false;
     }
   }
