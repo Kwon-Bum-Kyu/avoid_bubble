@@ -10,8 +10,12 @@ import '../models/bullet_model.dart';
 import '../services/audio_service.dart';
 
 // Web에서만 사용할 조건부 import
-import 'dart:js_interop';
-import 'dart:js_interop_unsafe';
+import 'dart:js_interop'
+    if (dart.library.html) 'dart:js_interop'
+    if (dart.library.io) 'js_interop_stub.dart';
+import 'dart:js_interop_unsafe'
+    if (dart.library.html) 'dart:js_interop_unsafe'
+    if (dart.library.io) 'js_interop_stub.dart';
 
 // 게임의 핵심 로직을 담고 있는 메인 클래스
 class AvoidBubbleGame extends FlameGame {
@@ -49,40 +53,47 @@ class AvoidBubbleGame extends FlameGame {
           defaultTargetPlatform == TargetPlatform.iOS;
     }
   }
-  
+
   // User-agent 기반 모바일 디바이스 감지 (사이즈 무관)
   bool _checkMobileUserAgent() {
     try {
       // HTML의 JavaScript에서 user-agent 기반으로 감지된 결과 사용
       // 화면 크기는 고려하지 않고 순수하게 user-agent만으로 판단
-      
+
       if (kDebugMode) {
-        debugPrint('🔍 Mobile detection - Using JavaScript user-agent detection');
-        debugPrint('📱 Screen size ignored: ${size.x.toInt()}x${size.y.toInt()} (user-agent only)');
+        debugPrint(
+            '🔍 Mobile detection - Using JavaScript user-agent detection');
+        debugPrint(
+            '📱 Screen size ignored: ${size.x.toInt()}x${size.y.toInt()} (user-agent only)');
       }
-      
+
       // JavaScript에서 설정한 IS_MOBILE_DEVICE 전역 변수 읽기
       if (kIsWeb) {
         try {
           // dart:js_interop_unsafe를 사용하여 window.IS_MOBILE_DEVICE 값을 읽어옴
           final isMobile = globalContext.getProperty('IS_MOBILE_DEVICE'.toJS);
           final result = (isMobile as JSBoolean?)?.toDart ?? false;
-          
+
           if (kDebugMode) {
             debugPrint('🌐 JavaScript IS_MOBILE_DEVICE: $isMobile → $result');
           }
-          
+
           return result;
         } catch (e) {
-          if (kDebugMode) debugPrint('⚠️ JavaScript interop error: $e, falling back to false');
+          if (kDebugMode) {
+            debugPrint(
+                '⚠️ JavaScript interop error: $e, falling back to false');
+          }
           return false;
         }
       }
-      
+
       return false;
     } catch (e) {
       // fallback: 오류 시 데스크톱으로 간주
-      if (kDebugMode) debugPrint('⚠️ Mobile detection error: $e (defaulting to desktop)');
+      if (kDebugMode) {
+        debugPrint('⚠️ Mobile detection error: $e (defaulting to desktop)');
+      }
       return false;
     }
   }
@@ -424,7 +435,7 @@ class AvoidBubbleGame extends FlameGame {
           // 조이스틱 델타 값을 정규화된 방향값(-1~1)으로 변환
           final normalizedX = joystick!.delta.x.clamp(-1.0, 1.0);
           final normalizedY = joystick!.delta.y.clamp(-1.0, 1.0);
-          
+
           // 키보드와 동일한 방식으로 방향값 전달
           setPlayerMovement(normalizedX, normalizedY);
         } else {
