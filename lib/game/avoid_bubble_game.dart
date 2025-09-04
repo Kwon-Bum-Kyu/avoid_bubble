@@ -10,7 +10,8 @@ import '../models/bullet_model.dart';
 import '../services/audio_service.dart';
 
 // Web에서만 사용할 조건부 import
-import 'dart:js' as js;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 // 게임의 핵심 로직을 담고 있는 메인 클래스
 class AvoidBubbleGame extends FlameGame {
@@ -63,10 +64,9 @@ class AvoidBubbleGame extends FlameGame {
       // JavaScript에서 설정한 IS_MOBILE_DEVICE 전역 변수 읽기
       if (kIsWeb) {
         try {
-          // dart:js를 사용하여 window.IS_MOBILE_DEVICE 값을 읽어옴
-          final jsContext = js.context;
-          final isMobile = jsContext['IS_MOBILE_DEVICE'];
-          final result = isMobile == true;
+          // dart:js_interop_unsafe를 사용하여 window.IS_MOBILE_DEVICE 값을 읽어옴
+          final isMobile = globalContext.getProperty('IS_MOBILE_DEVICE'.toJS);
+          final result = (isMobile as JSBoolean?)?.toDart ?? false;
           
           if (kDebugMode) {
             debugPrint('🌐 JavaScript IS_MOBILE_DEVICE: $isMobile → $result');
