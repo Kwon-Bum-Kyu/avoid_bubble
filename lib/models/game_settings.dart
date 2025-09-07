@@ -5,7 +5,6 @@ class GameSettings {
   // 게임 난이도
   double bulletSpeed; // 총알 속도
   double playerSpeed; // 플레이어 속도
-  double playerCollisionRadius; // 플레이어 충돌 범위 반지름
   bool isInvincible; // 무적 모드 여부 (개발용)
 
   // 패턴 타이밍 설정
@@ -23,8 +22,6 @@ class GameSettings {
   GameSettings({
     this.bulletSpeed = GameConstants.bulletSpeed,
     this.playerSpeed = GameConstants.playerSpeed,
-    this.playerCollisionRadius = GameConstants
-        .playerCollisionRadiusDefault, // 기본값: 플레이어 충돌 범위 고정값 (더 이상 사용되지 않음)
     this.isInvincible = GameConstants.isInvincibleDefault,
     PatternTimings? patternTimings,
     this.soundEnabled = true,
@@ -37,7 +34,6 @@ class GameSettings {
   GameSettings copyWith({
     double? bulletSpeed,
     double? playerSpeed,
-    double? playerCollisionRadius,
     bool? isInvincible,
     PatternTimings? patternTimings,
     bool? soundEnabled,
@@ -52,9 +48,6 @@ class GameSettings {
       playerSpeed: EnvironmentConfig.isDeveloperModeEnabled
           ? (playerSpeed ?? this.playerSpeed)
           : this.playerSpeed, // 프로덕션에서는 기존 값 유지
-      playerCollisionRadius: EnvironmentConfig.isDeveloperModeEnabled
-          ? (playerCollisionRadius ?? this.playerCollisionRadius)
-          : this.playerCollisionRadius, // 프로덕션에서는 기존 값 유지
       isInvincible: EnvironmentConfig.isDeveloperModeEnabled
           ? (isInvincible ?? this.isInvincible)
           : false, // 프로덕션에서는 항상 false
@@ -84,8 +77,6 @@ class GameSettings {
       showHitboxes: DebugConstants.showHitboxes,
       bulletSpeed: DebugConstants.bulletSpeed,
       playerSpeed: DebugConstants.playerSpeed,
-      playerCollisionRadius: GameConstants
-          .playerCollisionRadiusDefault, // 플레이어 충돌 범위 고정값 (더 이상 사용되지 않음)
       patternTimings: PatternTimings(
         pattern1StartTime: DebugConstants.pattern1StartTime,
         pattern1EndTime: DebugConstants.pattern1EndTime,

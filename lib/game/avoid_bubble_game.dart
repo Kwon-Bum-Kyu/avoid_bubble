@@ -223,6 +223,7 @@ class AvoidBubbleGame extends FlameGame {
       startPosition: startPosition,
       direction: direction,
       speed: settings.bulletSpeed,
+      screenSize: size,
     );
     add(bullet);
   }
@@ -253,11 +254,22 @@ class AvoidBubbleGame extends FlameGame {
     // 시작 위치에서 플레이어 중앙으로 향하는 방향 벡터 계산
     final direction = (playerCenter - startPosition).normalized();
 
+    // 5초마다 총알 속도 1씩 증가 (무한 증가)
+    final speedBonus = (survivalTime ~/ 5).toDouble();
+    final adjustedSpeed = settings.bulletSpeed + speedBonus;
+
+    // 디버그 로그 추가
+    if (kDebugMode) {
+      debugPrint(
+          '🔥 Pattern1 Bullet - Speed: $adjustedSpeed (base: ${settings.bulletSpeed}, bonus: $speedBonus), Direction: $direction');
+    }
+
     final bullet = Bullet(
       startPosition: startPosition,
       direction: direction,
-      speed: settings.bulletSpeed,
+      speed: adjustedSpeed,
       type: BulletType.targeted,
+      screenSize: size,
     );
     add(bullet);
   }
@@ -294,6 +306,7 @@ class AvoidBubbleGame extends FlameGame {
           direction: targetDirection,
           speed: settings.bulletSpeed,
           type: BulletType.directional,
+          screenSize: size,
         ),
       );
     }
@@ -302,15 +315,16 @@ class AvoidBubbleGame extends FlameGame {
   // 패턴 3: 상하좌우 순서대로 한 방향에서 일직선으로 총알 생성
   void spawnLinearBullets() {
     if (isGameOver || !isLoaded || !isMounted) return;
-    final bulletCount = 8;
     final direction = pattern3Direction;
 
     late Vector2 startPos;
     late Vector2 directionVector;
     late double spacing;
+    late int bulletCount;
 
     switch (direction) {
       case 0: // 위에서 아래로
+        bulletCount = 10;
         spacing = size.x / (bulletCount + 1);
         directionVector = Vector2(0, 1).normalized();
         for (int i = 1; i <= bulletCount; i++) {
@@ -321,11 +335,13 @@ class AvoidBubbleGame extends FlameGame {
               direction: directionVector,
               speed: settings.bulletSpeed,
               type: BulletType.linear,
+              screenSize: size,
             ),
           );
         }
         break;
-      case 1: // 오른쪽에서 왼쪽으로
+      case 1: // 오른쪽에서 왼쪽으로 (6개로 조정)
+        bulletCount = 6;
         spacing = size.y / (bulletCount + 1);
         directionVector = Vector2(-1, 0).normalized();
         for (int i = 1; i <= bulletCount; i++) {
@@ -336,11 +352,13 @@ class AvoidBubbleGame extends FlameGame {
               direction: directionVector,
               speed: settings.bulletSpeed,
               type: BulletType.linear,
+              screenSize: size,
             ),
           );
         }
         break;
       case 2: // 아래에서 위로
+        bulletCount = 10;
         spacing = size.x / (bulletCount + 1);
         directionVector = Vector2(0, -1).normalized();
         for (int i = 1; i <= bulletCount; i++) {
@@ -351,11 +369,13 @@ class AvoidBubbleGame extends FlameGame {
               direction: directionVector,
               speed: settings.bulletSpeed,
               type: BulletType.linear,
+              screenSize: size,
             ),
           );
         }
         break;
-      case 3: // 왼쪽에서 오른쪽으로
+      case 3: // 왼쪽에서 오른쪽으로 (6개로 조정)
+        bulletCount = 6;
         spacing = size.y / (bulletCount + 1);
         directionVector = Vector2(1, 0).normalized();
         for (int i = 1; i <= bulletCount; i++) {
@@ -366,6 +386,7 @@ class AvoidBubbleGame extends FlameGame {
               direction: directionVector,
               speed: settings.bulletSpeed,
               type: BulletType.linear,
+              screenSize: size,
             ),
           );
         }

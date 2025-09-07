@@ -70,14 +70,6 @@ if [ ! -z "$SUPABASE_URL" ] && [ ! -z "$SUPABASE_ANON_KEY" ] && \
 else
     echo "  - ⚠️ Supabase: 오프라인 모드"
     echo "     (온라인 랭킹 기능 비활성화)"
-    echo ""
-    echo "💡 온라인 모드로 실행하려면:"
-    echo "   1. .env 파일에 Supabase 설정 추가:"
-    echo "      echo 'SUPABASE_URL=https://your-project.supabase.co' >> .env.development"
-    echo "      echo 'SUPABASE_ANON_KEY=your-anon-key' >> .env.development"
-    echo "   2. 또는 환경변수로 전달:"
-    echo "      SUPABASE_URL=\"...\" SUPABASE_ANON_KEY=\"...\" ./scripts/run_chrome_dev.sh"
-    echo ""
     
     # 오프라인 모드 실행
     flutter run -d chrome \

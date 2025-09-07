@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/ranking_model.dart';
 import '../services/ranking_service.dart';
 import '../services/nickname_service.dart';
+import '../utils/responsive_utils.dart';
 
 class RankingScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -77,6 +78,9 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isCompactHeight = ResponsiveUtils.isCompactHeight(context);
+    final isWideScreen = ResponsiveUtils.isWideScreen(context);
+    
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -91,33 +95,36 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
             children: [
               // 헤더
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: ResponsiveUtils.getResponsivePadding(context),
                 child: Row(
                   children: [
                     IconButton(
                       onPressed: widget.onBack,
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      iconSize: 30,
+                      iconSize: ResponsiveUtils.getResponsiveIconSize(context, mobile: 24),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '🏆 랭킹',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(context,
+                            mobile: 24, tablet: 28, desktop: 32),
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(width: 48), // Balance the back button
+                    SizedBox(width: ResponsiveUtils.getResponsiveIconSize(context, mobile: 24) + 16),
                   ],
                 ),
               ),
               
               // 탭바
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
+                margin: EdgeInsets.symmetric(
+                  horizontal: isWideScreen ? 40.0 : (isCompactHeight ? 15.0 : 20.0)
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(10),
@@ -135,7 +142,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                 ),
               ),
               
-              const SizedBox(height: 16),
+              SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 16)),
               
               // 콘텐츠
               Expanded(
@@ -156,15 +163,25 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
               
               // 새로고침 버튼
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: ResponsiveUtils.getResponsivePadding(context),
                 child: ElevatedButton.icon(
                   onPressed: _isLoading ? null : _loadData,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('새로고침'),
+                  icon: Icon(Icons.refresh, 
+                    size: ResponsiveUtils.getResponsiveIconSize(context, mobile: 20)
+                  ),
+                  label: Text(
+                    '새로고침',
+                    style: TextStyle(
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobile: 16, tablet: 18)
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveUtils.getResponsiveSpacing(context, base: 24), 
+                      vertical: isCompactHeight ? 10 : 12
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

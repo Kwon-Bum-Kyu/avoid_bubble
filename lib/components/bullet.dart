@@ -12,13 +12,14 @@ class Bullet extends SpriteComponent with HasGameReference<AvoidBubbleGame> {
     required Vector2 direction,
     required double speed,
     BulletType type = BulletType.targeted,
+    Vector2? screenSize,
   }) {
     model = BulletModel(
       startPosition: startPosition,
       direction: direction,
       speed: speed,
-      radius: 24.0, // 총알 충돌 반지름 고정값
       type: type,
+      screenSize: screenSize,
     );
     // 모델의 위치와 크기를 기반으로 컴포넌트의 위치와 크기를 설정
     position = model.position;
@@ -26,6 +27,7 @@ class Bullet extends SpriteComponent with HasGameReference<AvoidBubbleGame> {
     anchor = Anchor.center; // 앵커를 중심으로 설정
     priority = 1; // 우선순위 설정
   }
+
 
   @override
   Future<void> onLoad() async {
