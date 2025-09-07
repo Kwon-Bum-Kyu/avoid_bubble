@@ -324,7 +324,11 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 15),
                               ),
-                              child: const Text('기본값으로 재설정'),
+                              child: const Text(
+                                '기본값으로 재설정',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 10),
