@@ -29,6 +29,9 @@ class Player extends SpriteAnimationComponent
   Future<void> onLoad() async {
     await super.onLoad();
 
+    // 화면 크기를 모델에 설정하여 스케일링 적용
+    model.setScreenSize(game.size);
+
     // PlayerModel의 스킨 정보를 사용하여 스프라이트 시트 이미지 로드
     final spriteImage = await game.images.load(model.spriteSheet);
 

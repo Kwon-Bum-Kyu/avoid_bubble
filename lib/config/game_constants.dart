@@ -7,14 +7,6 @@ class GameConstants {
   static const double playerSpeedMax = 500.0; // 설정 최대값
   static const double playerSpeed = 300.0; // 기본값
 
-  // 플레이어 충돌 범위 (더 이상 사용되지 않음 - 스킨별로 관리)
-  // @Deprecated('Use CharacterSkin.collisionRadius instead')
-  static const double playerCollisionRadiusMin = 8.0;
-  // @Deprecated('Use CharacterSkin.collisionRadius instead')
-  static const double playerCollisionRadiusMax = 20.0;
-  // @Deprecated('Use CharacterSkin.collisionRadius instead')
-  static const double playerCollisionRadiusDefault = 12.0;
-
   // ===== 총알 관련 상수 =====
 
   // 총알 속도 설정
@@ -23,8 +15,7 @@ class GameConstants {
   static const double bulletSpeed = 100.0; // 총알속도
 
   // 총알 크기 및 충돌
-  static const double bulletRadius = 8.0; // 총알 반지름 (고정)
-  static const double bulletSize = 16.0; // 총알 크기 (직경)
+  static const double bulletRadius = 24.0; // 총알 지름 (1440x720 기준 기본값)
 
   // ===== 게임 패턴 타이밍 상수 =====
 

@@ -132,16 +132,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                                     playerSpeed: value);
                               }),
                             ),
-                            _buildSlider(
-                              '충돌 범위 크기',
-                              _currentSettings.playerCollisionRadius,
-                              8.0,
-                              24.0,
-                              (value) => setState(() {
-                                _currentSettings = _currentSettings.copyWith(
-                                    playerCollisionRadius: value);
-                              }),
-                            ),
                             _buildSwitch(
                               '무적 모드',
                               _currentSettings.isInvincible,

@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../config/game_constants.dart';
 
@@ -12,7 +13,7 @@ enum BulletType {
 // 총알의 데이터와 상태를 관리하는 모델 클래스
 class BulletModel {
   final double speed; // 속도
-  final double radius; // 반지름 (충돌 감지용)
+  late final double radius; // 반지름 (충돌 감지용)
   final BulletType type; // 총알 종류
   final Vector2 startPosition; // 시작 위치
   final Vector2 direction; // 방향
@@ -20,23 +21,57 @@ class BulletModel {
   late Vector2 velocity; // 속도 벡터
   bool hasEnteredScreen; // 화면에 진입한 적 있는지 여부
   bool isActive; // 활성화 상태 여부
+  final Vector2? _screenSize; // 화면 크기 (반응형 스케일링용)
 
   // 생성자
   BulletModel({
     required this.startPosition,
     required this.direction,
     this.speed = GameConstants.bulletSpeed,
-    this.radius = GameConstants.bulletRadius,
     this.type = BulletType.targeted,
+    Vector2? screenSize,
   })  : position = startPosition.clone(),
         hasEnteredScreen = false,
-        isActive = true {
+        isActive = true,
+        _screenSize = screenSize {
+    // 화면 크기에 따른 반응형 반지름 계산
+    radius = _calculateRadius();
+
     // 방향과 속도를 기반으로 속도 벡터 초기화
     if (direction.length > 0) {
       velocity = direction.normalized() * speed;
     } else {
       velocity = Vector2.zero();
     }
+  }
+
+  // 화면 크기에 따른 총알 반지름 계산 (1440x720 기준 12px)
+  double _calculateRadius() {
+    if (_screenSize == null) {
+      return GameConstants.bulletRadius; // 기본값 사용
+    }
+
+    // 기준 해상도 (1440x720)
+    const baseWidth = 1440.0;
+    const baseHeight = 720.0;
+    const baseBulletRadius = GameConstants.bulletRadius; // 1440x720에서 24px
+
+    // 현재 화면 크기
+    final currentWidth = _screenSize.x;
+    final currentHeight = _screenSize.y;
+
+    // 화면 비율에 따른 스케일링
+    final scaleX = currentWidth / baseWidth;
+    final scaleY = currentHeight / baseHeight;
+    final scale = (scaleX + scaleY) / 2; // 평균 스케일 사용
+
+    // 스케일링된 크기 계산 (최소 8px 제한)
+    final scaledRadius = baseBulletRadius * scale;
+    final finalRadius = scaledRadius.clamp(16.0, 24.0);
+
+    debugPrint(
+        'bullet radius calculation - screen: ${currentWidth}x$currentHeight, scale: $scale, radius: $finalRadius');
+    return finalRadius;
   }
 
   // 매 프레임마다 위치 업데이트
@@ -99,15 +134,15 @@ class BulletModel {
     required Vector2 startPosition,
     required Vector2 playerPosition,
     double speed = 100.0,
-    double radius = 24.0,
+    Vector2? screenSize,
   }) {
     final direction = (playerPosition - startPosition).normalized();
     return BulletModel(
       startPosition: startPosition,
       direction: direction,
       speed: speed,
-      radius: radius,
       type: BulletType.targeted,
+      screenSize: screenSize,
     );
   }
 
@@ -115,14 +150,14 @@ class BulletModel {
     required Vector2 startPosition,
     required Vector2 direction,
     double speed = 100.0,
-    double radius = 24.0,
+    Vector2? screenSize,
   }) {
     return BulletModel(
       startPosition: startPosition,
       direction: direction,
       speed: speed,
-      radius: radius,
       type: BulletType.directional,
+      screenSize: screenSize,
     );
   }
 
@@ -130,14 +165,14 @@ class BulletModel {
     required Vector2 startPosition,
     required Vector2 direction,
     double speed = 100.0,
-    double radius = 24.0,
+    Vector2? screenSize,
   }) {
     return BulletModel(
       startPosition: startPosition,
       direction: direction,
       speed: speed,
-      radius: radius,
       type: BulletType.linear,
+      screenSize: screenSize,
     );
   }
 
@@ -146,7 +181,6 @@ class BulletModel {
     required Vector2 playerCenter,
     required Vector2 screenSize,
     double speed = 100.0,
-    double radius = 24.0,
   }) {
     final bullets = <BulletModel>[];
 
@@ -173,7 +207,7 @@ class BulletModel {
           startPosition: startPosition,
           direction: targetDirection,
           speed: speed,
-          radius: radius,
+          screenSize: screenSize,
         ),
       );
     }
@@ -187,7 +221,6 @@ class BulletModel {
     required Vector2 screenSize,
     int bulletCount = 8,
     double speed = 100.0,
-    double radius = 24.0,
   }) {
     final bullets = <BulletModel>[];
 
@@ -206,7 +239,7 @@ class BulletModel {
               startPosition: startPos,
               direction: directionVector,
               speed: speed,
-              radius: radius,
+              screenSize: screenSize,
             ),
           );
         }
@@ -222,7 +255,7 @@ class BulletModel {
               startPosition: startPos,
               direction: directionVector,
               speed: speed,
-              radius: radius,
+              screenSize: screenSize,
             ),
           );
         }
@@ -238,7 +271,7 @@ class BulletModel {
               startPosition: startPos,
               direction: directionVector,
               speed: speed,
-              radius: radius,
+              screenSize: screenSize,
             ),
           );
         }
@@ -254,7 +287,7 @@ class BulletModel {
               startPosition: startPos,
               direction: directionVector,
               speed: speed,
-              radius: radius,
+              screenSize: screenSize,
             ),
           );
         }
@@ -269,15 +302,15 @@ class BulletModel {
     Vector2? startPosition,
     Vector2? direction,
     double? speed,
-    double? radius,
     BulletType? type,
+    Vector2? screenSize,
   }) {
     return BulletModel(
       startPosition: startPosition ?? this.startPosition,
       direction: direction ?? this.direction,
       speed: speed ?? this.speed,
-      radius: radius ?? this.radius,
       type: type ?? this.type,
+      screenSize: screenSize ?? _screenSize,
     );
   }
 }
