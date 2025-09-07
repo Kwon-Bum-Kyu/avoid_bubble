@@ -1,7 +1,7 @@
-import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../services/nickname_service.dart';
 import '../utils/responsive_utils.dart';
+import '../services/localization_service.dart';
 
 class NicknameRegistrationScreen extends StatefulWidget {
   final VoidCallback onNicknameRegistered;
@@ -44,7 +44,6 @@ class _NicknameRegistrationScreenState
 
   Future<void> _registerNickname() async {
     final nickname = _nicknameController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isLoading = true;
@@ -64,7 +63,7 @@ class _NicknameRegistrationScreenState
       }
     } catch (e) {
       setState(() {
-        _errorMessage = l10n.nickname_networkError;
+        _errorMessage = LocalizationService.getText('nickname_network_error');
       });
     } finally {
       setState(() {
@@ -76,7 +75,6 @@ class _NicknameRegistrationScreenState
   @override
   Widget build(BuildContext context) {
     final isCompactHeight = ResponsiveUtils.isCompactHeight(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Container(
         decoration: const BoxDecoration(
@@ -118,7 +116,7 @@ class _NicknameRegistrationScreenState
                             ),
                             SizedBox(height: isCompactHeight ? 12 : 16),
                             Text(
-                              l10n.nickname_title,
+                              LocalizationService.getText('nickname_title'),
                               style: TextStyle(
                                 fontSize: ResponsiveUtils.getResponsiveFontSize(
                                     context,
@@ -131,7 +129,7 @@ class _NicknameRegistrationScreenState
                             ),
                             SizedBox(height: isCompactHeight ? 6 : 8),
                             Text(
-                              l10n.nickname_subtitle,
+                              LocalizationService.getText('nickname_subtitle'),
                               style: TextStyle(
                                 fontSize: ResponsiveUtils.getResponsiveFontSize(
                                     context,
@@ -166,7 +164,7 @@ class _NicknameRegistrationScreenState
                                           mobile: 18),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: l10n.nickname_hint,
+                                  hintText: LocalizationService.getText('nickname_hint'),
                                   hintStyle:
                                       const TextStyle(color: Colors.white54),
                                   border: InputBorder.none,
@@ -194,7 +192,7 @@ class _NicknameRegistrationScreenState
 
                             // 안내 텍스트
                             Text(
-                              l10n.nickname_rules,
+                              LocalizationService.getText('nickname_rules'),
                               style: const TextStyle(
                                 color: Colors.white60,
                                 fontSize: 12,
@@ -223,7 +221,7 @@ class _NicknameRegistrationScreenState
                                         ),
                                       ),
                                       child: Text(
-                                        l10n.nickname_later,
+                                        LocalizationService.getText('nickname_later'),
                                         style: const TextStyle(fontSize: 16),
                                       ),
                                     ),
@@ -255,7 +253,7 @@ class _NicknameRegistrationScreenState
                                             ),
                                           )
                                         : Text(
-                                            l10n.nickname_register,
+                                            LocalizationService.getText('nickname_register'),
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,

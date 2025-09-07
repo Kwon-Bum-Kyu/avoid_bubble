@@ -6,6 +6,7 @@ import 'game/avoid_bubble_game.dart';
 import 'game/game_state.dart';
 import 'models/game_settings.dart';
 import 'models/game_stats.dart';
+import 'services/localization_service.dart';
 import 'screens/start_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
@@ -17,6 +18,9 @@ import 'services/audio_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 브라우저 언어 감지 및 설정
+  LocalizationService.detectBrowserLanguage();
 
   // Flutter 프레임워크 오류 처리 (마우스 트래킹 등)
   FlutterError.onError = (FlutterErrorDetails details) {

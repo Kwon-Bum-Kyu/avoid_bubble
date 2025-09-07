@@ -1,7 +1,7 @@
-import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/game_settings.dart';
 import '../config/environment_config.dart';
+import '../services/localization_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final GameSettings settings;
@@ -60,7 +60,6 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -88,7 +87,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                     ),
                     Expanded(
                       child: Text(
-                        l10n.settings_title,
+                        LocalizationService.getText('settings_title'),
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -112,10 +111,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                       // 개발자 모드 섹션 (로컬 빌드에서만 표시)
                       if (EnvironmentConfig.isDeveloperModeEnabled) ...[
                         _buildSection(
-                          l10n.settings_gameDifficulty,
+                          LocalizationService.getText('settings_game_difficulty'),
                           [
                             _buildSlider(
-                              l10n.settings_bulletSpeed,
+                              LocalizationService.getText('settings_bullet_speed'),
                               _currentSettings.bulletSpeed,
                               40.0,
                               150.0,
@@ -125,7 +124,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSlider(
-                              l10n.settings_playerSpeed,
+                              LocalizationService.getText('settings_player_speed'),
                               _currentSettings.playerSpeed,
                               200.0,
                               500.0,
@@ -135,7 +134,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSwitch(
-                              l10n.settings_invincibleMode,
+                              LocalizationService.getText('settings_invincible_mode'),
                               _currentSettings.isInvincible,
                               (value) => setState(() {
                                 _currentSettings = _currentSettings.copyWith(
@@ -150,10 +149,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                       // 패턴 시간 조정 섹션 (로컬 빌드에서만 표시)
                       if (EnvironmentConfig.isDeveloperModeEnabled) ...[
                         _buildSection(
-                          l10n.settings_patternTimings,
+                          LocalizationService.getText('settings_pattern_timings'),
                           [
                             _buildSlider(
-                              l10n.settings_pattern1Start,
+                              LocalizationService.getText('settings_pattern1_start'),
                               _currentSettings.patternTimings.pattern1StartTime,
                               1.0,
                               10.0,
@@ -167,7 +166,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSlider(
-                              l10n.settings_pattern2Start,
+                              LocalizationService.getText('settings_pattern2_start'),
                               _currentSettings.patternTimings.pattern2StartTime,
                               10.0,
                               30.0,
@@ -181,7 +180,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSlider(
-                              l10n.settings_pattern3Start,
+                              LocalizationService.getText('settings_pattern3_start'),
                               _currentSettings.patternTimings.pattern3StartTime,
                               20.0,
                               60.0,
@@ -202,7 +201,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 20),
 
                       _buildSection(
-                        l10n.settings_visualAudio,
+                        LocalizationService.getText('settings_visual_audio'),
                         [
                           // 히트박스 표시는 개발자 모드에서만 표시
                           if (EnvironmentConfig.isDeveloperModeEnabled) ...[
@@ -210,7 +209,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildSwitch(
-                                  l10n.settings_showHitboxes,
+                                  LocalizationService.getText('settings_show_hitboxes'),
                                   _currentSettings.showHitboxes,
                                   (value) => setState(() {
                                     _currentSettings = _currentSettings
@@ -222,7 +221,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: Text(
-                                      l10n.settings_hitboxInfo,
+                                      LocalizationService.getText('settings_hitbox_info'),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey[600],
@@ -235,7 +234,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ],
                           _buildSwitch(
-                            l10n.settings_soundEffects,
+                            LocalizationService.getText('settings_sound_effects'),
                             _currentSettings.soundEnabled,
                             (value) => setState(() {
                               _currentSettings = _currentSettings.copyWith(
@@ -243,7 +242,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                             }),
                           ),
                           _buildVolumeSlider(
-                            l10n.settings_sound,
+                            LocalizationService.getText('settings_sound'),
                             _currentSettings.soundVolume,
                             (value) => setState(() {
                               _currentSettings =
@@ -255,7 +254,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
                       // 환경 정보 표시
                       _buildSection(
-                        l10n.settings_buildInfo,
+                        LocalizationService.getText('settings_build_info'),
                         [
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -269,8 +268,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  l10n.settings_environment(
-                                      EnvironmentConfig.environmentName),
+                                  LocalizationService.getFormattedText('settings_environment', [EnvironmentConfig.environmentName]),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -280,8 +278,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   EnvironmentConfig.isDeveloperModeEnabled
-                                      ? l10n.settings_devFeaturesEnabled
-                                      : l10n.settings_productionMode,
+                                      ? LocalizationService.getText('settings_dev_features_enabled')
+                                      : LocalizationService.getText('settings_production_mode'),
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white70,
@@ -290,10 +288,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 if (EnvironmentConfig.showDebugInfo) ...[
                                   const SizedBox(height: 8),
                                   Text(
-                                    l10n.settings_debugMode(
-                                        EnvironmentConfig.isLocal
-                                            ? "활성"
-                                            : "비활성"),
+                                    LocalizationService.getFormattedText('settings_debug_mode', [EnvironmentConfig.isLocal ? LocalizationService.getText('active') : LocalizationService.getText('inactive')]),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.white60,
@@ -321,7 +316,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                                     const EdgeInsets.symmetric(vertical: 15),
                               ),
                               child: Text(
-                                l10n.settings_resetToDefault,
+                                LocalizationService.getText('settings_reset_to_default'),
                                 style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
@@ -337,7 +332,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                                     const EdgeInsets.symmetric(vertical: 15),
                               ),
                               child: Text(
-                                l10n.settings_saveSettings,
+                                LocalizationService.getText('settings_save_settings'),
                                 style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
@@ -363,8 +358,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                           ),
                           label: Text(
                             _currentSettings.showHitboxes
-                                ? l10n.settings_hideHitboxes
-                                : l10n.settings_showHitboxesToggle,
+                                ? LocalizationService.getText('settings_hide_hitboxes')
+                                : LocalizationService.getText('settings_show_hitboxes_toggle'),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _currentSettings.showHitboxes

@@ -1,6 +1,6 @@
-import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/game_stats.dart';
+import '../services/localization_service.dart';
 
 class StartScreen extends StatelessWidget {
   final VoidCallback onStartGame;
@@ -20,7 +20,6 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isCompactHeight = screenHeight < 500; // 모바일 가로 모드 감지
-    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       decoration: const BoxDecoration(
@@ -54,11 +53,11 @@ class StartScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child:
-                            _buildMainContent(context, isCompactHeight, l10n),
+                            _buildMainContent(context, isCompactHeight),
                       ),
                     )
                   : Center(
-                      child: _buildMainContent(context, isCompactHeight, l10n),
+                      child: _buildMainContent(context, isCompactHeight),
                     ),
             ),
           ],
@@ -68,12 +67,12 @@ class StartScreen extends StatelessWidget {
   }
 
   Widget _buildMainContent(
-      BuildContext context, bool isCompactHeight, AppLocalizations l10n) {
+      BuildContext context, bool isCompactHeight) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          l10n.startScreen_title,
+          LocalizationService.getText('start_title'),
           style: TextStyle(
             fontSize: isCompactHeight ? 32 : 48, // 컴팩트 모드에서 폰트 크기 감소
             fontWeight: FontWeight.bold,
@@ -90,7 +89,7 @@ class StartScreen extends StatelessWidget {
         ),
         SizedBox(height: isCompactHeight ? 10 : 20), // 컴팩트 모드에서 간격 감소
         Text(
-          l10n.startScreen_subtitle,
+          LocalizationService.getText('start_subtitle'),
           style: const TextStyle(
             fontSize: 18,
             color: Colors.white70,
@@ -112,7 +111,7 @@ class StartScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  l10n.startScreen_bestTime(stats.bestTime.toStringAsFixed(1)),
+                  LocalizationService.getFormattedText('start_best_time', [stats.bestTime.toStringAsFixed(1)]),
                   style: TextStyle(
                     fontSize: isCompactHeight ? 16 : 18,
                     fontWeight: FontWeight.bold,
@@ -122,7 +121,7 @@ class StartScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  l10n.startScreen_gamesPlayed(stats.totalGamesPlayed),
+                  LocalizationService.getFormattedText('start_games_played', [stats.totalGamesPlayed]),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
@@ -130,7 +129,7 @@ class StartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  l10n.startScreen_mostCommonGrade(stats.mostCommonGrade),
+                  LocalizationService.getFormattedText('start_most_common_grade', [stats.mostCommonGrade]),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
@@ -159,7 +158,7 @@ class StartScreen extends StatelessWidget {
             ),
           ),
           child: Text(
-            l10n.startScreen_startGame,
+            LocalizationService.getText('start_game'),
             style:
                 const TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
           ),
@@ -183,14 +182,14 @@ class StartScreen extends StatelessWidget {
             ),
           ),
           child: Text(
-            l10n.startScreen_viewRanking,
+            LocalizationService.getText('start_view_ranking'),
             style:
                 const TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
           ),
         ),
         SizedBox(height: isCompactHeight ? 15 : 20),
         Text(
-          l10n.start_screen_controls,
+          LocalizationService.getText('start_controls'),
           style: const TextStyle(
             fontSize: 14,
             color: Colors.white60,

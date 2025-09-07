@@ -1,9 +1,9 @@
-import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../models/ranking_model.dart';
 import '../services/ranking_service.dart';
 import '../services/nickname_service.dart';
+import '../services/localization_service.dart';
 import '../utils/responsive_utils.dart';
 import 'nickname_registration_screen.dart';
 
@@ -129,7 +129,6 @@ class _GameOverScreenState extends State<GameOverScreen> {
     final gradeColor = _getGradeColor(grade);
     final isCompactHeight = ResponsiveUtils.isCompactHeight(context);
     final isWideScreen = ResponsiveUtils.isWideScreen(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       decoration: const BoxDecoration(
@@ -166,7 +165,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   ],
                 ),
                 child: _buildMainContent(
-                    l10n, grade, gradeColor, isCompactHeight, isWideScreen),
+                    grade, gradeColor, isCompactHeight, isWideScreen),
               ),
             ),
           ),
@@ -175,13 +174,13 @@ class _GameOverScreenState extends State<GameOverScreen> {
     );
   }
 
-  Widget _buildMainContent(AppLocalizations l10n, String grade, Color gradeColor, bool isCompactHeight, bool isWideScreen) {
+  Widget _buildMainContent(String grade, Color gradeColor, bool isCompactHeight, bool isWideScreen) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Game Over Title
         Text(
-          l10n.gameOver_title,
+          LocalizationService.getText('game_over_title'),
           style: TextStyle(
             fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                 mobile: 28, tablet: 32, desktop: 36),
@@ -205,7 +204,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
           child: Column(
             children: [
               Text(
-                l10n.gameOver_survivalTime,
+                LocalizationService.getText('game_over_survival_time'),
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                       mobile: 14, tablet: 16, desktop: 18),
@@ -216,7 +215,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   height:
                       ResponsiveUtils.getResponsiveSpacing(context, base: 8)),
               Text(
-                l10n.gameOver_timeUnit(_formatTime(widget.survivalTime)),
+                LocalizationService.getFormattedText('game_over_time_unit', [_formatTime(widget.survivalTime)]),
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                       mobile: 32, tablet: 36, desktop: 40),
@@ -236,7 +235,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  l10n.gameOver_grade(grade),
+                  LocalizationService.getFormattedText('game_over_grade', [grade]),
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                         mobile: 14, tablet: 16, desktop: 18),
@@ -271,7 +270,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.gameOver_newBestRecord,
+                    LocalizationService.getText('game_over_new_best_record'),
                     style: TextStyle(
                       fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                           mobile: 16, tablet: 18, desktop: 20),
@@ -282,7 +281,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   if (_currentRank != null) ...[
                     const SizedBox(height: 8),
                     Text(
-                      l10n.gameOver_currentRank(_currentRank!),
+                      LocalizationService.getFormattedText('game_over_current_rank', [_currentRank!]),
                       style: TextStyle(
                         color: Colors.orange,
                         fontSize: ResponsiveUtils.getResponsiveFontSize(context,
@@ -302,7 +301,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                l10n.gameOver_currentRank(_currentRank!),
+                LocalizationService.getFormattedText('game_over_current_rank', [_currentRank!]),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
@@ -328,7 +327,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.gameOver_challengeRanking,
+                  LocalizationService.getText('game_over_challenge_ranking'),
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                         mobile: 16, tablet: 18, desktop: 20),
@@ -338,7 +337,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.gameOver_registerNicknamePrompt,
+                  LocalizationService.getText('game_over_register_nickname_prompt'),
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
@@ -356,7 +355,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(l10n.gameOver_registerNicknameButton),
+                  child: Text(LocalizationService.getText('game_over_register_nickname_button')),
                 ),
               ],
             ),
@@ -382,7 +381,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   ),
                 ),
                 child: Text(
-                  l10n.gameOver_restart,
+                  LocalizationService.getText('game_over_restart'),
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                         mobile: 16, tablet: 18),
@@ -405,7 +404,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   ),
                 ),
                 child: Text(
-                  l10n.gameOver_menu,
+                  LocalizationService.getText('game_over_menu'),
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                         mobile: 16, tablet: 18),
@@ -433,7 +432,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 ),
               ),
               child: Text(
-                l10n.gameOver_viewRanking,
+                LocalizationService.getText('game_over_view_ranking'),
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                       mobile: 16, tablet: 18),

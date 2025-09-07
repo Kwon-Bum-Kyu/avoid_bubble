@@ -1,9 +1,9 @@
-import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/ranking_model.dart';
 import '../services/ranking_service.dart';
 import '../services/nickname_service.dart';
 import '../utils/responsive_utils.dart';
+import '../services/localization_service.dart';
 
 class RankingScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -61,10 +61,9 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
     } catch (e) {
       // 에러 처리
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.ranking_loadFailed),
+            content: Text(LocalizationService.getText('ranking_load_failed')),
             backgroundColor: Colors.red,
           ),
         );
@@ -82,7 +81,6 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
   Widget build(BuildContext context) {
     final isCompactHeight = ResponsiveUtils.isCompactHeight(context);
     final isWideScreen = ResponsiveUtils.isWideScreen(context);
-    final l10n = AppLocalizations.of(context)!;
     
     return Container(
       decoration: const BoxDecoration(
@@ -108,7 +106,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                     ),
                     Expanded(
                       child: Text(
-                        l10n.ranking_title,
+                        LocalizationService.getText('ranking_title'),
                         style: TextStyle(
                           fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                             mobile: 24, tablet: 28, desktop: 32),
@@ -135,8 +133,8 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                 child: TabBar(
                   controller: _tabController,
                   tabs: [
-                    Tab(text: l10n.ranking_all),
-                    Tab(text: l10n.ranking_myRecords),
+                    Tab(text: LocalizationService.getText('ranking_all')),
+                    Tab(text: LocalizationService.getText('ranking_my_records')),
                   ],
                   labelColor: Colors.orange,
                   unselectedLabelColor: Colors.white70,
@@ -158,7 +156,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                     : TabBarView(
                         controller: _tabController,
                         children: [
-                          _buildRankingList(_allTimeRankings, l10n.ranking_noRecords),
+                          _buildRankingList(_allTimeRankings, LocalizationService.getText('ranking_no_records')),
                           _buildMyRecordsList(),
                         ],
                       ),
@@ -173,7 +171,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                     size: ResponsiveUtils.getResponsiveIconSize(context, mobile: 20)
                   ),
                   label: Text(
-                    l10n.ranking_refresh,
+                    LocalizationService.getText('ranking_refresh'),
                     style: TextStyle(
                       fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobile: 16, tablet: 18)
                     ),
@@ -199,7 +197,6 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
   }
 
   Widget _buildRankingList(List<RankingModel> rankings, String emptyMessage) {
-    final l10n = AppLocalizations.of(context)!;
     if (rankings.isEmpty) {
       return Center(
         child: Text(
@@ -264,7 +261,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      l10n.ranking_me,
+                      LocalizationService.getText('ranking_me'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -276,7 +273,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
               ],
             ),
             subtitle: Text(
-              l10n.ranking_survivalTime(ranking.survivalTime.toStringAsFixed(1)),
+              LocalizationService.getFormattedText('ranking_survival_time', [ranking.survivalTime.toStringAsFixed(1)]),
               style: const TextStyle(color: Colors.white70),
             ),
             trailing: Container(
@@ -301,11 +298,10 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
   }
 
   Widget _buildMyRecordsList() {
-    final l10n = AppLocalizations.of(context)!;
     if (_currentNickname == null || _currentNickname!.isEmpty) {
       return Center(
         child: Text(
-          l10n.ranking_registerPrompt,
+          LocalizationService.getText('ranking_register_prompt'),
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 16,
@@ -318,7 +314,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
     if (_myRecords.isEmpty) {
       return Center(
         child: Text(
-          l10n.ranking_noMyRecords,
+          LocalizationService.getText('ranking_no_my_records'),
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 16,
@@ -360,7 +356,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
             title: Row(
               children: [
                 Text(
-                  l10n.gameOver_timeUnit(record.survivalTime.toStringAsFixed(1)),
+                  LocalizationService.getFormattedText('ranking_survival_time', [record.survivalTime.toStringAsFixed(1)]),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: isPersonalBest ? FontWeight.bold : FontWeight.normal,
@@ -376,7 +372,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      l10n.ranking_best,
+                      LocalizationService.getText('ranking_best'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -390,7 +386,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
             subtitle: Text(
               record.createdAt != null 
                   ? '${record.createdAt!.year}-${record.createdAt!.month.toString().padLeft(2, '0')}-${record.createdAt!.day.toString().padLeft(2, '0')}'
-                  : l10n.ranking_noDate,
+                  : LocalizationService.getText('ranking_no_date'),
               style: const TextStyle(color: Colors.white70),
             ),
             trailing: Container(
