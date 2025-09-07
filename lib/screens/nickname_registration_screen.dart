@@ -1,3 +1,4 @@
+import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../services/nickname_service.dart';
 import '../utils/responsive_utils.dart';
@@ -43,6 +44,7 @@ class _NicknameRegistrationScreenState
 
   Future<void> _registerNickname() async {
     final nickname = _nicknameController.text.trim();
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isLoading = true;
@@ -62,7 +64,7 @@ class _NicknameRegistrationScreenState
       }
     } catch (e) {
       setState(() {
-        _errorMessage = '네트워크 오류가 발생했습니다.';
+        _errorMessage = l10n.nickname_networkError;
       });
     } finally {
       setState(() {
@@ -74,6 +76,7 @@ class _NicknameRegistrationScreenState
   @override
   Widget build(BuildContext context) {
     final isCompactHeight = ResponsiveUtils.isCompactHeight(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
         decoration: const BoxDecoration(
@@ -115,7 +118,7 @@ class _NicknameRegistrationScreenState
                             ),
                             SizedBox(height: isCompactHeight ? 12 : 16),
                             Text(
-                              '닉네임 등록',
+                              l10n.nickname_title,
                               style: TextStyle(
                                 fontSize: ResponsiveUtils.getResponsiveFontSize(
                                     context,
@@ -128,7 +131,7 @@ class _NicknameRegistrationScreenState
                             ),
                             SizedBox(height: isCompactHeight ? 6 : 8),
                             Text(
-                              '랭킹 등록을 위해 닉네임을 설정해주세요',
+                              l10n.nickname_subtitle,
                               style: TextStyle(
                                 fontSize: ResponsiveUtils.getResponsiveFontSize(
                                     context,
@@ -163,7 +166,7 @@ class _NicknameRegistrationScreenState
                                           mobile: 18),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: '닉네임 입력 (2-12자)',
+                                  hintText: l10n.nickname_hint,
                                   hintStyle:
                                       const TextStyle(color: Colors.white54),
                                   border: InputBorder.none,
@@ -190,9 +193,9 @@ class _NicknameRegistrationScreenState
                             const SizedBox(height: 16),
 
                             // 안내 텍스트
-                            const Text(
-                              '• 한글, 영문, 숫자만 사용 가능\n• 2-12자로 입력해주세요\n• 중복된 닉네임은 사용할 수 없습니다',
-                              style: TextStyle(
+                            Text(
+                              l10n.nickname_rules,
+                              style: const TextStyle(
                                 color: Colors.white60,
                                 fontSize: 12,
                               ),
@@ -219,9 +222,9 @@ class _NicknameRegistrationScreenState
                                               BorderRadius.circular(10),
                                         ),
                                       ),
-                                      child: const Text(
-                                        '나중에',
-                                        style: TextStyle(fontSize: 16),
+                                      child: Text(
+                                        l10n.nickname_later,
+                                        style: const TextStyle(fontSize: 16),
                                       ),
                                     ),
                                   ),
@@ -251,9 +254,9 @@ class _NicknameRegistrationScreenState
                                                       Colors.white),
                                             ),
                                           )
-                                        : const Text(
-                                            '등록하기',
-                                            style: TextStyle(
+                                        : Text(
+                                            l10n.nickname_register,
+                                            style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                             ),

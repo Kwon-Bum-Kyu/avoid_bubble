@@ -1,3 +1,4 @@
+import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/ranking_model.dart';
 import '../services/ranking_service.dart';
@@ -60,9 +61,10 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
     } catch (e) {
       // 에러 처리
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('랭킹 데이터 로드에 실패했습니다.'),
+          SnackBar(
+            content: Text(l10n.ranking_loadFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -80,6 +82,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
   Widget build(BuildContext context) {
     final isCompactHeight = ResponsiveUtils.isCompactHeight(context);
     final isWideScreen = ResponsiveUtils.isWideScreen(context);
+    final l10n = AppLocalizations.of(context)!;
     
     return Container(
       decoration: const BoxDecoration(
@@ -105,7 +108,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                     ),
                     Expanded(
                       child: Text(
-                        '🏆 랭킹',
+                        l10n.ranking_title,
                         style: TextStyle(
                           fontSize: ResponsiveUtils.getResponsiveFontSize(context,
                             mobile: 24, tablet: 28, desktop: 32),
@@ -131,9 +134,9 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                 ),
                 child: TabBar(
                   controller: _tabController,
-                  tabs: const [
-                    Tab(text: '전체'),
-                    Tab(text: '내 기록'),
+                  tabs: [
+                    Tab(text: l10n.ranking_all),
+                    Tab(text: l10n.ranking_myRecords),
                   ],
                   labelColor: Colors.orange,
                   unselectedLabelColor: Colors.white70,
@@ -155,7 +158,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                     : TabBarView(
                         controller: _tabController,
                         children: [
-                          _buildRankingList(_allTimeRankings, '아직 등록된 기록이 없습니다.'),
+                          _buildRankingList(_allTimeRankings, l10n.ranking_noRecords),
                           _buildMyRecordsList(),
                         ],
                       ),
@@ -170,7 +173,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                     size: ResponsiveUtils.getResponsiveIconSize(context, mobile: 20)
                   ),
                   label: Text(
-                    '새로고침',
+                    l10n.ranking_refresh,
                     style: TextStyle(
                       fontSize: ResponsiveUtils.getResponsiveFontSize(context, mobile: 16, tablet: 18)
                     ),
@@ -196,6 +199,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
   }
 
   Widget _buildRankingList(List<RankingModel> rankings, String emptyMessage) {
+    final l10n = AppLocalizations.of(context)!;
     if (rankings.isEmpty) {
       return Center(
         child: Text(
@@ -259,9 +263,9 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
-                      'ME',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.ranking_me,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -272,7 +276,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
               ],
             ),
             subtitle: Text(
-              '생존 시간: ${ranking.survivalTime.toStringAsFixed(1)}초',
+              l10n.ranking_survivalTime(ranking.survivalTime.toStringAsFixed(1)),
               style: const TextStyle(color: Colors.white70),
             ),
             trailing: Container(
@@ -297,11 +301,12 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
   }
 
   Widget _buildMyRecordsList() {
+    final l10n = AppLocalizations.of(context)!;
     if (_currentNickname == null || _currentNickname!.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          '닉네임을 등록하면 내 기록을 확인할 수 있습니다.',
-          style: TextStyle(
+          l10n.ranking_registerPrompt,
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 16,
           ),
@@ -311,10 +316,10 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
     }
 
     if (_myRecords.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          '아직 등록된 기록이 없습니다.\n게임을 플레이해보세요!',
-          style: TextStyle(
+          l10n.ranking_noMyRecords,
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 16,
           ),
@@ -355,7 +360,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
             title: Row(
               children: [
                 Text(
-                  '${record.survivalTime.toStringAsFixed(1)}초',
+                  l10n.gameOver_timeUnit(record.survivalTime.toStringAsFixed(1)),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: isPersonalBest ? FontWeight.bold : FontWeight.normal,
@@ -370,9 +375,9 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
-                      'BEST',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.ranking_best,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -385,7 +390,7 @@ class _RankingScreenState extends State<RankingScreen> with TickerProviderStateM
             subtitle: Text(
               record.createdAt != null 
                   ? '${record.createdAt!.year}-${record.createdAt!.month.toString().padLeft(2, '0')}-${record.createdAt!.day.toString().padLeft(2, '0')}'
-                  : '날짜 정보 없음',
+                  : l10n.ranking_noDate,
               style: const TextStyle(color: Colors.white70),
             ),
             trailing: Container(

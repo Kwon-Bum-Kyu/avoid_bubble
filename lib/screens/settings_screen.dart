@@ -1,3 +1,4 @@
+import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/game_settings.dart';
 import '../config/environment_config.dart';
@@ -59,6 +60,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -84,10 +86,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                       onPressed: widget.onBack,
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        '설정',
-                        style: TextStyle(
+                        l10n.settings_title,
+                        style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -110,10 +112,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                       // 개발자 모드 섹션 (로컬 빌드에서만 표시)
                       if (EnvironmentConfig.isDeveloperModeEnabled) ...[
                         _buildSection(
-                          '게임 난이도 (개발자 모드)',
+                          l10n.settings_gameDifficulty,
                           [
                             _buildSlider(
-                              '총알 속도',
+                              l10n.settings_bulletSpeed,
                               _currentSettings.bulletSpeed,
                               40.0,
                               150.0,
@@ -123,7 +125,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSlider(
-                              '플레이어 속도',
+                              l10n.settings_playerSpeed,
                               _currentSettings.playerSpeed,
                               200.0,
                               500.0,
@@ -133,7 +135,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSwitch(
-                              '무적 모드',
+                              l10n.settings_invincibleMode,
                               _currentSettings.isInvincible,
                               (value) => setState(() {
                                 _currentSettings = _currentSettings.copyWith(
@@ -148,10 +150,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                       // 패턴 시간 조정 섹션 (로컬 빌드에서만 표시)
                       if (EnvironmentConfig.isDeveloperModeEnabled) ...[
                         _buildSection(
-                          '패턴 시간 (개발자 모드)',
+                          l10n.settings_patternTimings,
                           [
                             _buildSlider(
-                              '패턴 1 시작 (초)',
+                              l10n.settings_pattern1Start,
                               _currentSettings.patternTimings.pattern1StartTime,
                               1.0,
                               10.0,
@@ -165,7 +167,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSlider(
-                              '패턴 2 시작 (초)',
+                              l10n.settings_pattern2Start,
                               _currentSettings.patternTimings.pattern2StartTime,
                               10.0,
                               30.0,
@@ -179,7 +181,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               }),
                             ),
                             _buildSlider(
-                              '패턴 3 시작 (초)',
+                              l10n.settings_pattern3Start,
                               _currentSettings.patternTimings.pattern3StartTime,
                               20.0,
                               60.0,
@@ -200,7 +202,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 20),
 
                       _buildSection(
-                        '시각 및 오디오',
+                        l10n.settings_visualAudio,
                         [
                           // 히트박스 표시는 개발자 모드에서만 표시
                           if (EnvironmentConfig.isDeveloperModeEnabled) ...[
@@ -208,7 +210,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildSwitch(
-                                  '히트박스 표시 (개발자 전용)',
+                                  l10n.settings_showHitboxes,
                                   _currentSettings.showHitboxes,
                                   (value) => setState(() {
                                     _currentSettings = _currentSettings
@@ -220,7 +222,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: Text(
-                                      '• 플레이어: 초록색 원\n• 모든 탄막: 빨간색 원',
+                                      l10n.settings_hitboxInfo,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey[600],
@@ -233,7 +235,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ],
                           _buildSwitch(
-                            '사운드 효과',
+                            l10n.settings_soundEffects,
                             _currentSettings.soundEnabled,
                             (value) => setState(() {
                               _currentSettings = _currentSettings.copyWith(
@@ -241,7 +243,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                             }),
                           ),
                           _buildVolumeSlider(
-                            '사운드',
+                            l10n.settings_sound,
                             _currentSettings.soundVolume,
                             (value) => setState(() {
                               _currentSettings =
@@ -253,7 +255,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
                       // 환경 정보 표시
                       _buildSection(
-                        '빌드 정보',
+                        l10n.settings_buildInfo,
                         [
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -267,7 +269,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '환경: ${EnvironmentConfig.environmentName}',
+                                  l10n.settings_environment(
+                                      EnvironmentConfig.environmentName),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -277,8 +280,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   EnvironmentConfig.isDeveloperModeEnabled
-                                      ? '개발자 기능이 활성화되어 있습니다.'
-                                      : '프로덕션 모드로 실행 중입니다.',
+                                      ? l10n.settings_devFeaturesEnabled
+                                      : l10n.settings_productionMode,
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white70,
@@ -287,7 +290,10 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 if (EnvironmentConfig.showDebugInfo) ...[
                                   const SizedBox(height: 8),
                                   Text(
-                                    '디버그 모드: ${EnvironmentConfig.isLocal ? "활성" : "비활성"}',
+                                    l10n.settings_debugMode(
+                                        EnvironmentConfig.isLocal
+                                            ? "활성"
+                                            : "비활성"),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.white60,
@@ -314,9 +320,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 15),
                               ),
-                              child: const Text(
-                                '기본값으로 재설정',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.settings_resetToDefault,
+                                style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -330,9 +336,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 15),
                               ),
-                              child: const Text(
-                                '설정 저장',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.settings_saveSettings,
+                                style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -357,8 +363,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                           ),
                           label: Text(
                             _currentSettings.showHitboxes
-                                ? '히트박스 숨기기'
-                                : '히트박스 표시',
+                                ? l10n.settings_hideHitboxes
+                                : l10n.settings_showHitboxesToggle,
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _currentSettings.showHitboxes
