@@ -201,9 +201,34 @@
 
       // Flutter에서 호출
       window.gameLoadingComplete = function () {
+        console.log("🚀 Flutter 게임 로딩 완료");
         gameReady = true;
         checkGameReady();
       };
+
+      // itch.io 환경 디버깅을 위한 추가 정보
+      if (window.parent !== window) {
+        console.log("🔍 itch.io 환경 정보:");
+        console.log("   - User Agent:", navigator.userAgent);
+        console.log("   - Platform:", navigator.platform);
+        console.log("   - Language:", navigator.language);
+        console.log("   - Online:", navigator.onLine);
+        
+        // itch.io에서 필요한 권한 체크
+        setTimeout(function() {
+          console.log("⏰ 10초 후 게임 상태 체크...");
+          setTimeout(function() {
+            if (!flutterReady && !gameReady) {
+              console.error("❌ 게임 로딩 실패 - Flutter 초기화되지 않음");
+              console.log("💡 해결책: 브라우저 캐시 삭제 후 새로고침");
+            } else if (flutterReady && !gameReady) {
+              console.log("⚠️ Flutter는 로딩되었으나 게임 준비 안됨");
+            } else {
+              console.log("✅ 게임 정상 로딩 완료");
+            }
+          }, 10000);
+        }, 1000);
+      }
 
       // 모바일 디바이스 감지 함수
       window.isMobileDevice = function () {
@@ -221,88 +246,142 @@
       // Flutter가 로드되면 모바일 여부를 전역 변수로 설정
       window.IS_MOBILE_DEVICE = window.isMobileDevice();
 
-      // 마우스 트래킹 오류 방지를 위한 전역 설정
+      // 마우스 트래킹 오류 방지를 위한 전역 설정 (itch.io 호환성 개선)
       window.addEventListener("error", function (e) {
-        // 마우스 트래킹 관련 오류 무시
-        if (
-          e.message &&
-          (e.message.includes("mouse_tracker") ||
-            e.message.includes("deviceUpdatePhase") ||
-            e.message.includes("_debugDuringDeviceUpdate") ||
-            e.message.includes("updateAllDevices") ||
-            e.message.includes("RenderObject"))
-        ) {
+        // itch.io iframe에서 발생하는 일반적인 오류들 무시
+        if (e.message && (
+          e.message.includes("mouse_tracker") ||
+          e.message.includes("deviceUpdatePhase") ||
+          e.message.includes("_debugDuringDeviceUpdate") ||
+          e.message.includes("updateAllDevices") ||
+          e.message.includes("RenderObject") ||
+          e.message.includes("orientation") ||
+          e.message.includes("NotSupportedError") ||
+          e.message.includes("SecurityError") ||
+          e.message.includes("DOMException")
+        )) {
           e.preventDefault();
           return false;
         }
       });
 
-      // unhandledrejection 이벤트도 처리
+      // unhandledrejection 이벤트도 처리 (itch.io 호환성 개선)
       window.addEventListener("unhandledrejection", function (e) {
-        if (
-          e.reason &&
-          e.reason.toString &&
-          (e.reason.toString().includes("mouse_tracker") ||
-            e.reason.toString().includes("deviceUpdatePhase") ||
-            e.reason.toString().includes("_debugDuringDeviceUpdate"))
-        ) {
-          e.preventDefault();
-          return false;
+        if (e.reason && e.reason.toString) {
+          const reasonStr = e.reason.toString().toLowerCase();
+          // itch.io iframe에서 발생하는 일반적인 Promise rejection 무시
+          if (reasonStr.includes("mouse_tracker") ||
+              reasonStr.includes("deviceupdatephase") ||
+              reasonStr.includes("debugduringdeviceupdate") ||
+              reasonStr.includes("orientation") ||
+              reasonStr.includes("notsupported") ||
+              reasonStr.includes("securityerror") ||
+              reasonStr.includes("domexception") ||
+              reasonStr.includes("network")) {
+            e.preventDefault();
+            return false;
+          }
         }
       });
 
       // iframe 환경에서의 마우스 이벤트 처리 개선
       if (window.parent !== window) {
         // iframe 내부에서 실행 중 (itch.io 등)
-        document.addEventListener("mouseleave", function () {
-          // 마우스가 iframe을 벗어날 때 안전하게 처리
-        });
+        console.log("🎮 itch.io iframe 환경에서 실행 중");
+        console.log("📱 Mobile Device:", window.IS_MOBILE_DEVICE);
+        console.log("🖥️ Screen Size:", window.innerWidth + "x" + window.innerHeight);
+        
+        // itch.io iframe에서 안전한 설정
+        try {
+          document.addEventListener("mouseleave", function () {
+            // 마우스가 iframe을 벗어날 때 안전하게 처리
+          });
 
-        document.addEventListener("mouseenter", function () {
-          // 마우스가 iframe으로 들어올 때 안전하게 처리
-        });
+          document.addEventListener("mouseenter", function () {
+            // 마우스가 iframe으로 들어올 때 안전하게 처리
+          });
+
+          // iframe 환경에서 포커스 관리
+          document.addEventListener("click", function () {
+            try {
+              window.focus();
+            } catch (e) {
+              // 포커스 오류 무시
+            }
+          });
+
+          // iframe 크기 변경 감지
+          window.addEventListener("resize", function () {
+            try {
+              // Flutter에게 크기 변경 알림
+              if (window.dispatchEvent) {
+                window.dispatchEvent(new Event('resize'));
+              }
+            } catch (e) {
+              // 리사이즈 이벤트 오류 무시
+            }
+          });
+        } catch (e) {
+          console.log("iframe 이벤트 설정 오류 (정상적인 동작)");
+        }
       }
 
       // body 태그에 모바일 클래스 추가 (Flutter에서 CSS로 감지 가능)
       if (window.IS_MOBILE_DEVICE) {
         document.body.classList.add("mobile-device");
 
-        // 모바일에서 landscape 강제 설정
+        // 모바일에서 landscape 강제 설정 (itch.io 호환성 개선)
         try {
-          if (screen.orientation && screen.orientation.lock) {
+          // itch.io iframe 환경에서는 orientation lock이 제한됨
+          if (window.parent !== window) {
+            // iframe 환경 (itch.io 등)에서는 orientation lock을 시도하지 않음
+            console.log("iframe 환경에서는 화면 회전 잠금을 지원하지 않습니다");
+          } else if (screen.orientation && screen.orientation.lock && typeof screen.orientation.lock === 'function') {
+            // 일반 브라우저 환경에서만 시도
             screen.orientation.lock("landscape").catch(function (err) {
-              console.error("Screen orientation lock failed:", err);
+              console.log("화면 회전 잠금 실패 (정상적인 동작):", err.message);
             });
           }
         } catch (e) {
-          console.error("Screen orientation API not available");
+          console.log("화면 회전 API 사용 불가 (정상적인 동작)");
         }
 
-        // 화면 회전 감지 및 알림
+        // 화면 회전 감지 및 알림 (itch.io 호환성 개선)
         window.addEventListener("orientationchange", function () {
           setTimeout(function () {
-            const orientation = screen.orientation
-              ? screen.orientation.angle
-              : window.orientation;
+            try {
+              const orientation = screen.orientation
+                ? screen.orientation.angle
+                : (typeof window.orientation !== 'undefined' ? window.orientation : 0);
 
-            // 세로 방향일 때 알림 표시
-            if (Math.abs(orientation) !== 90) {
-              showOrientationMessage();
-            } else {
-              hideOrientationMessage();
+              // 세로 방향일 때만 알림 표시 (iframe이 아닌 경우만)
+              if (window.parent === window && Math.abs(orientation) !== 90) {
+                showOrientationMessage();
+              } else {
+                hideOrientationMessage();
+              }
+            } catch (e) {
+              // 오류 발생 시 조용히 무시
+              console.log("화면 회전 감지 오류 (정상적인 동작)");
             }
           }, 100);
         });
 
-        // 초기 방향 체크
-        setTimeout(function () {
-          const orientation = screen.orientation
-            ? screen.orientation.angle
-            : window.orientation;
-          if (Math.abs(orientation) !== 90) {
-            showOrientationMessage();
-          }
-        }, 1000);
+        // 초기 방향 체크 (iframe이 아닌 경우만)
+        if (window.parent === window) {
+          setTimeout(function () {
+            try {
+              const orientation = screen.orientation
+                ? screen.orientation.angle
+                : (typeof window.orientation !== 'undefined' ? window.orientation : 0);
+              if (Math.abs(orientation) !== 90) {
+                showOrientationMessage();
+              }
+            } catch (e) {
+              console.log("초기 화면 회전 체크 오류 (정상적인 동작)");
+            }
+          }, 1000);
+        }
       } else {
         document.body.classList.add("desktop-device");
       }

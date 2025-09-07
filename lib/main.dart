@@ -42,18 +42,25 @@ void main() async {
 
   // 웹 환경에서 안전한 orientation 처리 (itch.io 호환성)
   if (kIsWeb) {
-    // 웹에서는 강제 orientation 설정을 하지 않음 (itch.io 모바일 호환성)
     try {
-      // 가능하면 landscape를 선호하지만 실패해도 무시
+      // itch.io iframe 환경에서는 orientation 설정을 최소화
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
+      if (!kReleaseMode) debugPrint('✅ Orientation 설정 성공');
     } catch (e) {
-      // itch.io나 다른 환경에서 orientation 설정이 실패해도 계속 진행
-      if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패 (무시됨): $e');
+      // itch.io iframe에서는 orientation 제어가 제한되므로 무시
+      if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패 (itch.io 호환): $e');
+    }
+
+    // 웹에서 추가 안전 설정
+    try {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    } catch (e) {
+      if (!kReleaseMode) debugPrint('⚠️ SystemUI 설정 실패 (itch.io 호환): $e');
     }
   } else {
     // 네이티브 앱에서는 landscape 우선 설정
