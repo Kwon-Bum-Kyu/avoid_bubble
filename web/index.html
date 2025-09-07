@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
   <head>
     <!--
     If you are serving your web app in a path other than the root, change the
@@ -111,12 +111,12 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           sans-serif;
       }
-      
+
       /* 마우스 트래킹 문제 해결을 위한 CSS */
       flt-glass-pane {
         pointer-events: none !important;
       }
-      
+
       /* Flutter 렌더링 최적화 */
       flutter-view {
         touch-action: none;
@@ -220,42 +220,45 @@
 
       // Flutter가 로드되면 모바일 여부를 전역 변수로 설정
       window.IS_MOBILE_DEVICE = window.isMobileDevice();
-      
+
       // 마우스 트래킹 오류 방지를 위한 전역 설정
-      window.addEventListener('error', function(e) {
+      window.addEventListener("error", function (e) {
         // 마우스 트래킹 관련 오류 무시
-        if (e.message && (
-          e.message.includes('mouse_tracker') ||
-          e.message.includes('deviceUpdatePhase') ||
-          e.message.includes('_debugDuringDeviceUpdate') ||
-          e.message.includes('updateAllDevices') ||
-          e.message.includes('RenderObject')
-        )) {
+        if (
+          e.message &&
+          (e.message.includes("mouse_tracker") ||
+            e.message.includes("deviceUpdatePhase") ||
+            e.message.includes("_debugDuringDeviceUpdate") ||
+            e.message.includes("updateAllDevices") ||
+            e.message.includes("RenderObject"))
+        ) {
           e.preventDefault();
           return false;
         }
       });
-      
+
       // unhandledrejection 이벤트도 처리
-      window.addEventListener('unhandledrejection', function(e) {
-        if (e.reason && e.reason.toString && (
-          e.reason.toString().includes('mouse_tracker') ||
-          e.reason.toString().includes('deviceUpdatePhase') ||
-          e.reason.toString().includes('_debugDuringDeviceUpdate')
-        )) {
+      window.addEventListener("unhandledrejection", function (e) {
+        if (
+          e.reason &&
+          e.reason.toString &&
+          (e.reason.toString().includes("mouse_tracker") ||
+            e.reason.toString().includes("deviceUpdatePhase") ||
+            e.reason.toString().includes("_debugDuringDeviceUpdate"))
+        ) {
           e.preventDefault();
           return false;
         }
       });
-      
+
       // iframe 환경에서의 마우스 이벤트 처리 개선
       if (window.parent !== window) {
         // iframe 내부에서 실행 중 (itch.io 등)
-        document.addEventListener('mouseleave', function() {
+        document.addEventListener("mouseleave", function () {
           // 마우스가 iframe을 벗어날 때 안전하게 처리
         });
-        
-        document.addEventListener('mouseenter', function() {
+
+        document.addEventListener("mouseenter", function () {
           // 마우스가 iframe으로 들어올 때 안전하게 처리
         });
       }

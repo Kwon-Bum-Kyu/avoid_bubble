@@ -116,7 +116,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '어보이드 버블',
+      title: 'Avoid Bubble Game',
+      locale: const Locale('ko', 'KR'), // 기본 언어를 한국어로 설정
       theme: ThemeData(fontFamily: 'NexonCart'),
       home: GameWrapper(isOfflineMode: isOfflineMode),
       debugShowCheckedModeBanner: false,

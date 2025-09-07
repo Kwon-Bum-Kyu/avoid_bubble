@@ -1,3 +1,4 @@
+import 'package:avoid_bubble/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/game_stats.dart';
 
@@ -19,6 +20,7 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isCompactHeight = screenHeight < 500; // 모바일 가로 모드 감지
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       decoration: const BoxDecoration(
@@ -51,11 +53,12 @@ class StartScreen extends StatelessWidget {
                   ? SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _buildMainContent(isCompactHeight),
+                        child:
+                            _buildMainContent(context, isCompactHeight, l10n),
                       ),
                     )
                   : Center(
-                      child: _buildMainContent(isCompactHeight),
+                      child: _buildMainContent(context, isCompactHeight, l10n),
                     ),
             ),
           ],
@@ -64,12 +67,13 @@ class StartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContent(bool isCompactHeight) {
+  Widget _buildMainContent(
+      BuildContext context, bool isCompactHeight, AppLocalizations l10n) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '어보이드 버블',
+          l10n.startScreen_title,
           style: TextStyle(
             fontSize: isCompactHeight ? 32 : 48, // 컴팩트 모드에서 폰트 크기 감소
             fontWeight: FontWeight.bold,
@@ -85,9 +89,9 @@ class StartScreen extends StatelessWidget {
           ),
         ),
         SizedBox(height: isCompactHeight ? 10 : 20), // 컴팩트 모드에서 간격 감소
-        const Text(
-          '탄막을 피해 최대한 오래 생존하세요!',
-          style: TextStyle(
+        Text(
+          l10n.startScreen_subtitle,
+          style: const TextStyle(
             fontSize: 18,
             color: Colors.white70,
             decoration: TextDecoration.none, // 밑줄 제거
@@ -108,7 +112,7 @@ class StartScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Best Time: ${stats.bestTime.toStringAsFixed(1)}s',
+                  l10n.startScreen_bestTime(stats.bestTime.toStringAsFixed(1)),
                   style: TextStyle(
                     fontSize: isCompactHeight ? 16 : 18,
                     fontWeight: FontWeight.bold,
@@ -118,7 +122,7 @@ class StartScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Games Played: ${stats.totalGamesPlayed}',
+                  l10n.startScreen_gamesPlayed(stats.totalGamesPlayed),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
@@ -126,7 +130,7 @@ class StartScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Most Common Grade: ${stats.mostCommonGrade}',
+                  l10n.startScreen_mostCommonGrade(stats.mostCommonGrade),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
@@ -154,9 +158,10 @@ class StartScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text(
-            '게임 시작',
-            style: TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
+          child: Text(
+            l10n.startScreen_startGame,
+            style:
+                const TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
           ),
         ),
         SizedBox(height: isCompactHeight ? 8 : 10),
@@ -177,15 +182,16 @@ class StartScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text(
-            '랭킹 보기',
-            style: TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
+          child: Text(
+            l10n.startScreen_viewRanking,
+            style:
+                const TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
           ),
         ),
         SizedBox(height: isCompactHeight ? 15 : 20),
-        const Text(
-          '조작법: WASD 또는 방향키로 이동',
-          style: TextStyle(
+        Text(
+          l10n.start_screen_controls,
+          style: const TextStyle(
             fontSize: 14,
             color: Colors.white60,
             decoration: TextDecoration.none, // 밑줄 제거
