@@ -18,6 +18,24 @@ import 'services/audio_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Flutter 프레임워크 오류 처리 (마우스 트래킹 등)
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // 마우스 트래킹 관련 오류는 무시
+    if (details.toString().contains('mouse_tracker') ||
+        details.toString().contains('deviceUpdatePhase') ||
+        details.toString().contains('_debugDuringDeviceUpdate') ||
+        details.toString().contains('updateAllDevices') ||
+        details.toString().contains('RenderObject')) {
+      if (!kReleaseMode) {
+        debugPrint('⚠️ 무시된 마우스 트래킹 오류: ${details.exception}');
+      }
+      return;
+    }
+    
+    // 기타 중요한 오류는 로그
+    FlutterError.presentError(details);
+  };
+
   // 웹 환경에서 안전한 orientation 처리 (itch.io 호환성)
   if (kIsWeb) {
     // 웹에서는 강제 orientation 설정을 하지 않음 (itch.io 모바일 호환성)
@@ -409,7 +427,10 @@ class GameScreenState extends State<GameScreen> {
           },
           child: Stack(
             children: [
-              GameWidget(game: widget.game),
+              // 마우스 트래킹 오류 방지를 위해 MouseRegion 제거
+              RepaintBoundary(
+                child: GameWidget(game: widget.game),
+              ),
 
               // Home button (맨 위에 위치하여 다른 요소들에 가려지지 않도록)
               Positioned(

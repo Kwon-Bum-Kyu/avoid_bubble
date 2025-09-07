@@ -37,14 +37,15 @@ class _GameOverScreenState extends State<GameOverScreen> {
   Future<void> _checkAndRegisterRecord() async {
     try {
       _nickname = await NicknameService.getSavedNickname();
-      
+
       if (_nickname != null && _nickname!.isNotEmpty) {
-        _isNewBestRecord = await RankingService.isNewBestRecord(_nickname!, widget.survivalTime);
-        
+        _isNewBestRecord = await RankingService.isNewBestRecord(
+            _nickname!, widget.survivalTime);
+
         if (_isNewBestRecord) {
           await _registerRanking();
         }
-        
+
         _currentRank = await RankingService.getMyRank(widget.survivalTime);
       }
     } catch (e) {
@@ -56,14 +57,14 @@ class _GameOverScreenState extends State<GameOverScreen> {
 
   Future<void> _registerRanking() async {
     if (_nickname == null || _nickname!.isEmpty) return;
-    
+
     try {
       final ranking = RankingModel(
         playerName: _nickname!,
         survivalTime: widget.survivalTime,
         grade: _getScoreGrade(widget.survivalTime),
       );
-      
+
       await RankingService.addRankingIfBest(ranking);
     } catch (e) {
       // 에러 처리
@@ -101,13 +102,20 @@ class _GameOverScreenState extends State<GameOverScreen> {
 
   Color _getGradeColor(String grade) {
     switch (grade) {
-      case 'S': return const Color(0xFFFFD700); // Gold
-      case 'A': return const Color(0xFF32CD32); // Lime Green
-      case 'B': return const Color(0xFF1E90FF); // Dodger Blue
-      case 'C': return const Color(0xFFFF8C00); // Dark Orange
-      case 'D': return const Color(0xFFDC143C); // Crimson
-      case 'F': return const Color(0xFF808080); // Gray
-      default: return Colors.white;
+      case 'S':
+        return const Color(0xFFFFD700); // Gold
+      case 'A':
+        return const Color(0xFF32CD32); // Lime Green
+      case 'B':
+        return const Color(0xFF1E90FF); // Dodger Blue
+      case 'C':
+        return const Color(0xFFFF8C00); // Dark Orange
+      case 'D':
+        return const Color(0xFFDC143C); // Crimson
+      case 'F':
+        return const Color(0xFF808080); // Gray
+      default:
+        return Colors.white;
     }
   }
 
@@ -138,7 +146,8 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(isCompactHeight ? 15 : 20),
+                  borderRadius:
+                      BorderRadius.circular(isCompactHeight ? 15 : 20),
                   border: Border.all(
                     color: gradeColor.withValues(alpha: 0.6),
                     width: 2,
@@ -151,7 +160,8 @@ class _GameOverScreenState extends State<GameOverScreen> {
                     ),
                   ],
                 ),
-                child: _buildMainContent(grade, gradeColor, isCompactHeight, isWideScreen),
+                child: _buildMainContent(
+                    grade, gradeColor, isCompactHeight, isWideScreen),
               ),
             ),
           ),
@@ -160,7 +170,8 @@ class _GameOverScreenState extends State<GameOverScreen> {
     );
   }
 
-  Widget _buildMainContent(String grade, Color gradeColor, bool isCompactHeight, bool isWideScreen) {
+  Widget _buildMainContent(
+      String grade, Color gradeColor, bool isCompactHeight, bool isWideScreen) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -169,15 +180,16 @@ class _GameOverScreenState extends State<GameOverScreen> {
           'GAME OVER',
           style: TextStyle(
             fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-              mobile: 28, tablet: 32, desktop: 36),
+                mobile: 28, tablet: 32, desktop: 36),
             fontWeight: FontWeight.bold,
             color: Colors.red,
             letterSpacing: 2,
           ),
         ),
-        
-        SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 24)),
-        
+
+        SizedBox(
+            height: ResponsiveUtils.getResponsiveSpacing(context, base: 24)),
+
         // 생존 시간과 등급 표시
         Container(
           padding: EdgeInsets.all(isCompactHeight ? 15 : 20),
@@ -192,26 +204,29 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 '생존 시간',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                    mobile: 14, tablet: 16, desktop: 18),
+                      mobile: 14, tablet: 16, desktop: 18),
                   color: Colors.white.withValues(alpha: 0.8),
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 8)),
+              SizedBox(
+                  height:
+                      ResponsiveUtils.getResponsiveSpacing(context, base: 8)),
               Text(
                 '${_formatTime(widget.survivalTime)}초',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                    mobile: 32, tablet: 36, desktop: 40),
+                      mobile: 32, tablet: 36, desktop: 40),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 12)),
+              SizedBox(
+                  height:
+                      ResponsiveUtils.getResponsiveSpacing(context, base: 12)),
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isCompactHeight ? 12 : 16, 
-                  vertical: isCompactHeight ? 6 : 8
-                ),
+                    horizontal: isCompactHeight ? 12 : 16,
+                    vertical: isCompactHeight ? 6 : 8),
                 decoration: BoxDecoration(
                   color: gradeColor,
                   borderRadius: BorderRadius.circular(20),
@@ -220,7 +235,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   'Grade $grade',
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                      mobile: 14, tablet: 16, desktop: 18),
+                        mobile: 14, tablet: 16, desktop: 18),
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -230,11 +245,12 @@ class _GameOverScreenState extends State<GameOverScreen> {
           ),
         ),
 
-        SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 24)),
+        SizedBox(
+            height: ResponsiveUtils.getResponsiveSpacing(context, base: 24)),
 
         // 랭킹 정보 (닉네임이 있는 경우)
-        if (_nickname != null && _nickname!.isNotEmpty) ...[ 
-          if (_isNewBestRecord) 
+        if (_nickname != null && _nickname!.isNotEmpty) ...[
+          if (_isNewBestRecord)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -254,19 +270,19 @@ class _GameOverScreenState extends State<GameOverScreen> {
                     '새로운 최고 기록!',
                     style: TextStyle(
                       fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                        mobile: 16, tablet: 18, desktop: 20),
+                          mobile: 16, tablet: 18, desktop: 20),
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
                     ),
                   ),
-                  if (_currentRank != null) ...[ 
+                  if (_currentRank != null) ...[
                     const SizedBox(height: 8),
                     Text(
                       '현재 순위: $_currentRank위',
                       style: TextStyle(
                         color: Colors.orange,
                         fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                          mobile: 14, tablet: 16),
+                            mobile: 14, tablet: 16),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -286,11 +302,11 @@ class _GameOverScreenState extends State<GameOverScreen> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                    mobile: 16, tablet: 18),
+                      mobile: 16, tablet: 18),
                 ),
               ),
             ),
-        ] else ...[ 
+        ] else ...[
           // 닉네임이 없는 경우
           Container(
             padding: const EdgeInsets.all(16),
@@ -311,7 +327,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   '랭킹에 도전하세요!',
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                      mobile: 16, tablet: 18, desktop: 20),
+                        mobile: 16, tablet: 18, desktop: 20),
                     fontWeight: FontWeight.bold,
                     color: Colors.blue,
                   ),
@@ -322,7 +338,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                      mobile: 14, tablet: 16),
+                        mobile: 14, tablet: 16),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -343,7 +359,8 @@ class _GameOverScreenState extends State<GameOverScreen> {
           ),
         ],
 
-        SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 24)),
+        SizedBox(
+            height: ResponsiveUtils.getResponsiveSpacing(context, base: 24)),
 
         // 버튼들
         Row(
@@ -353,42 +370,41 @@ class _GameOverScreenState extends State<GameOverScreen> {
               child: ElevatedButton(
                 onPressed: widget.onRestart,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  padding: EdgeInsets.symmetric(
-                    vertical: isCompactHeight ? 12 : 15
-                  ),
+                  backgroundColor: Colors.lightGreen[700],
+                  padding:
+                      EdgeInsets.symmetric(vertical: isCompactHeight ? 12 : 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
                   '다시 시작',
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                      mobile: 16, tablet: 18),
+                        mobile: 16, tablet: 18),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
-            SizedBox(width: ResponsiveUtils.getResponsiveSpacing(context, base: 12)),
+            SizedBox(
+                width: ResponsiveUtils.getResponsiveSpacing(context, base: 12)),
             Expanded(
               child: ElevatedButton(
                 onPressed: widget.onBackToMenu,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[700],
-                  padding: EdgeInsets.symmetric(
-                    vertical: isCompactHeight ? 12 : 15
-                  ),
+                  backgroundColor: Colors.green[700],
+                  padding:
+                      EdgeInsets.symmetric(vertical: isCompactHeight ? 12 : 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
-                  '메뉴로',
+                  '메뉴',
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                      mobile: 16, tablet: 18),
+                        mobile: 16, tablet: 18),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -397,26 +413,26 @@ class _GameOverScreenState extends State<GameOverScreen> {
           ],
         ),
 
-        if (widget.onShowRanking != null) ...[ 
-          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, base: 12)),
+        if (widget.onShowRanking != null) ...[
+          SizedBox(
+              height: ResponsiveUtils.getResponsiveSpacing(context, base: 12)),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: widget.onShowRanking,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[700],
-                padding: EdgeInsets.symmetric(
-                  vertical: isCompactHeight ? 12 : 15
-                ),
+                padding:
+                    EdgeInsets.symmetric(vertical: isCompactHeight ? 12 : 15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: Text(
                 '랭킹 보기',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context,
-                    mobile: 16, tablet: 18),
+                      mobile: 16, tablet: 18),
                   fontWeight: FontWeight.bold,
                 ),
               ),

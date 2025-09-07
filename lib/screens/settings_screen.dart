@@ -32,7 +32,8 @@ class SettingsScreenState extends State<SettingsScreen> {
         pattern1StartTime: widget.settings.patternTimings.pattern1StartTime,
         pattern1EndTime: widget.settings.patternTimings.pattern1EndTime,
         pattern1Interval: widget.settings.patternTimings.pattern1Interval,
-        pattern1FastInterval: widget.settings.patternTimings.pattern1FastInterval,
+        pattern1FastInterval:
+            widget.settings.patternTimings.pattern1FastInterval,
         pattern2StartTime: widget.settings.patternTimings.pattern2StartTime,
         pattern2Interval: widget.settings.patternTimings.pattern2Interval,
         pattern3StartTime: widget.settings.patternTimings.pattern3StartTime,
@@ -53,12 +54,6 @@ class SettingsScreenState extends State<SettingsScreen> {
   void _resetToDefaults() {
     setState(() {
       _currentSettings = GameSettings.defaultSettings();
-    });
-  }
-
-  void _loadDebugSettings() {
-    setState(() {
-      _currentSettings = GameSettings.debugSettings();
     });
   }
 
@@ -104,7 +99,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              
+
               // Settings Content
               Expanded(
                 child: SingleChildScrollView(
@@ -123,7 +118,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                               40.0,
                               150.0,
                               (value) => setState(() {
-                                _currentSettings = _currentSettings.copyWith(bulletSpeed: value);
+                                _currentSettings = _currentSettings.copyWith(
+                                    bulletSpeed: value);
                               }),
                             ),
                             _buildSlider(
@@ -132,7 +128,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                               200.0,
                               500.0,
                               (value) => setState(() {
-                                _currentSettings = _currentSettings.copyWith(playerSpeed: value);
+                                _currentSettings = _currentSettings.copyWith(
+                                    playerSpeed: value);
                               }),
                             ),
                             _buildSlider(
@@ -141,21 +138,23 @@ class SettingsScreenState extends State<SettingsScreen> {
                               8.0,
                               24.0,
                               (value) => setState(() {
-                                _currentSettings = _currentSettings.copyWith(playerCollisionRadius: value);
+                                _currentSettings = _currentSettings.copyWith(
+                                    playerCollisionRadius: value);
                               }),
                             ),
                             _buildSwitch(
                               '무적 모드',
                               _currentSettings.isInvincible,
                               (value) => setState(() {
-                                _currentSettings = _currentSettings.copyWith(isInvincible: value);
+                                _currentSettings = _currentSettings.copyWith(
+                                    isInvincible: value);
                               }),
                             ),
                           ],
                         ),
                         const SizedBox(height: 20),
                       ],
-                      
+
                       // 패턴 시간 조정 섹션 (로컬 빌드에서만 표시)
                       if (EnvironmentConfig.isDeveloperModeEnabled) ...[
                         _buildSection(
@@ -168,7 +167,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                               10.0,
                               (value) => setState(() {
                                 _currentSettings = _currentSettings.copyWith(
-                                  patternTimings: _currentSettings.patternTimings.copyWith(
+                                  patternTimings:
+                                      _currentSettings.patternTimings.copyWith(
                                     pattern1StartTime: value,
                                   ),
                                 );
@@ -181,7 +181,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                               30.0,
                               (value) => setState(() {
                                 _currentSettings = _currentSettings.copyWith(
-                                  patternTimings: _currentSettings.patternTimings.copyWith(
+                                  patternTimings:
+                                      _currentSettings.patternTimings.copyWith(
                                     pattern2StartTime: value,
                                   ),
                                 );
@@ -194,7 +195,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                               60.0,
                               (value) => setState(() {
                                 _currentSettings = _currentSettings.copyWith(
-                                  patternTimings: _currentSettings.patternTimings.copyWith(
+                                  patternTimings:
+                                      _currentSettings.patternTimings.copyWith(
                                     pattern3StartTime: value,
                                   ),
                                 );
@@ -204,9 +206,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(height: 20),
                       ],
-                      
+
                       const SizedBox(height: 20),
-                      
+
                       _buildSection(
                         '시각 및 오디오',
                         [
@@ -219,7 +221,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                                   '히트박스 표시 (개발자 전용)',
                                   _currentSettings.showHitboxes,
                                   (value) => setState(() {
-                                    _currentSettings = _currentSettings.copyWith(showHitboxes: value);
+                                    _currentSettings = _currentSettings
+                                        .copyWith(showHitboxes: value);
                                   }),
                                 ),
                                 if (_currentSettings.showHitboxes) ...[
@@ -243,19 +246,21 @@ class SettingsScreenState extends State<SettingsScreen> {
                             '사운드 효과',
                             _currentSettings.soundEnabled,
                             (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(soundEnabled: value);
+                              _currentSettings = _currentSettings.copyWith(
+                                  soundEnabled: value);
                             }),
                           ),
                           _buildVolumeSlider(
                             '사운드',
                             _currentSettings.soundVolume,
                             (value) => setState(() {
-                              _currentSettings = _currentSettings.copyWith(soundVolume: value);
+                              _currentSettings =
+                                  _currentSettings.copyWith(soundVolume: value);
                             }),
                           ),
                         ],
                       ),
-                      
+
                       // 환경 정보 표시
                       _buildSection(
                         '빌드 정보',
@@ -263,7 +268,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: EnvironmentConfig.isDeveloperModeEnabled 
+                              color: EnvironmentConfig.isDeveloperModeEnabled
                                   ? Colors.orange.withValues(alpha: 0.3)
                                   : Colors.green.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(8),
@@ -281,7 +286,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  EnvironmentConfig.isDeveloperModeEnabled 
+                                  EnvironmentConfig.isDeveloperModeEnabled
                                       ? '개발자 기능이 활성화되어 있습니다.'
                                       : '프로덕션 모드로 실행 중입니다.',
                                   style: const TextStyle(
@@ -305,9 +310,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 30),
-                      
+
                       // Action Buttons
                       Row(
                         children: [
@@ -315,77 +320,61 @@ class SettingsScreenState extends State<SettingsScreen> {
                             child: ElevatedButton(
                               onPressed: _resetToDefaults,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[700],
-                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                backgroundColor: Colors.green[700],
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 15),
                               ),
                               child: const Text('기본값으로 재설정'),
                             ),
                           ),
                           const SizedBox(width: 10),
-                          // 디버그 모드 버튼은 로컬 빌드에서만 표시
-                          if (EnvironmentConfig.isDeveloperModeEnabled)
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: _loadDebugSettings,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange[700],
-                                  padding: const EdgeInsets.symmetric(vertical: 15),
-                                ),
-                                child: const Text('디버그 모드'),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _saveSettings,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.lightGreen[700],
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 15),
+                              ),
+                              child: const Text(
+                                '설정 저장',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
+                          ),
                         ],
                       ),
-                      
+
                       // 히트박스 퀵 토글 버튼 (개발자 모드에서만 표시)
                       if (EnvironmentConfig.isDeveloperModeEnabled) ...[
                         const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                _currentSettings = _currentSettings.copyWith(
-                                  showHitboxes: !_currentSettings.showHitboxes
-                                );
-                              });
-                            },
-                            icon: Icon(
-                              _currentSettings.showHitboxes 
-                                ? Icons.visibility_off 
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _currentSettings = _currentSettings.copyWith(
+                                  showHitboxes: !_currentSettings.showHitboxes);
+                            });
+                          },
+                          icon: Icon(
+                            _currentSettings.showHitboxes
+                                ? Icons.visibility_off
                                 : Icons.visibility,
-                            ),
-                            label: Text(
-                              _currentSettings.showHitboxes 
-                                ? '히트박스 숨기기' 
+                          ),
+                          label: Text(
+                            _currentSettings.showHitboxes
+                                ? '히트박스 숨기기'
                                 : '히트박스 표시',
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _currentSettings.showHitboxes 
-                                ? Colors.green[700] 
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _currentSettings.showHitboxes
+                                ? Colors.green[700]
                                 : Colors.blue[700],
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            minimumSize: const Size(double.infinity, 0),
                           ),
                         ),
                       ],
-                      
-                      const SizedBox(height: 10),
-                      
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saveSettings,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[700],
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                          ),
-                          child: const Text(
-                            '설정 저장',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

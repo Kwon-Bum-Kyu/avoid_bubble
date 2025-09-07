@@ -19,7 +19,7 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isCompactHeight = screenHeight < 500; // 모바일 가로 모드 감지
-    
+
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -47,16 +47,16 @@ class StartScreen extends StatelessWidget {
 
             // Main content (스크롤 가능하게 변경)
             Expanded(
-              child: isCompactHeight 
-                ? SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: isCompactHeight
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: _buildMainContent(isCompactHeight),
+                      ),
+                    )
+                  : Center(
                       child: _buildMainContent(isCompactHeight),
                     ),
-                  )
-                : Center(
-                    child: _buildMainContent(isCompactHeight),
-                  ),
             ),
           ],
         ),
@@ -74,6 +74,7 @@ class StartScreen extends StatelessWidget {
             fontSize: isCompactHeight ? 32 : 48, // 컴팩트 모드에서 폰트 크기 감소
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            decoration: TextDecoration.none, // 밑줄 명시적 제거
             shadows: const [
               Shadow(
                 offset: Offset(2, 2),
@@ -86,7 +87,11 @@ class StartScreen extends StatelessWidget {
         SizedBox(height: isCompactHeight ? 10 : 20), // 컴팩트 모드에서 간격 감소
         const Text(
           '탄막을 피해 최대한 오래 생존하세요!',
-          style: TextStyle(fontSize: 18, color: Colors.white70),
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white70,
+            decoration: TextDecoration.none, // 밑줄 제거
+          ),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: isCompactHeight ? 20 : 40),
@@ -108,6 +113,7 @@ class StartScreen extends StatelessWidget {
                     fontSize: isCompactHeight ? 16 : 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.yellow,
+                    decoration: TextDecoration.none, // 밑줄 제거
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -116,6 +122,7 @@ class StartScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
+                    decoration: TextDecoration.none, // 밑줄 제거
                   ),
                 ),
                 Text(
@@ -123,6 +130,7 @@ class StartScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
+                    decoration: TextDecoration.none, // 밑줄 제거
                   ),
                 ),
               ],
@@ -142,8 +150,14 @@ class StartScreen extends StatelessWidget {
               fontSize: isCompactHeight ? 20 : 24,
               fontWeight: FontWeight.bold,
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: const Text('게임 시작'),
+          child: const Text(
+            '게임 시작',
+            style: TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
+          ),
         ),
         SizedBox(height: isCompactHeight ? 8 : 10),
         ElevatedButton(
@@ -159,13 +173,23 @@ class StartScreen extends StatelessWidget {
               fontSize: isCompactHeight ? 20 : 24,
               fontWeight: FontWeight.bold,
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: const Text('랭킹 보기'),
+          child: const Text(
+            '랭킹 보기',
+            style: TextStyle(decoration: TextDecoration.none), // 명시적으로 밑줄 제거
+          ),
         ),
         SizedBox(height: isCompactHeight ? 15 : 20),
         const Text(
           '조작법: WASD 또는 방향키로 이동',
-          style: TextStyle(fontSize: 14, color: Colors.white60),
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white60,
+            decoration: TextDecoration.none, // 밑줄 제거
+          ),
           textAlign: TextAlign.center,
         ),
       ],
