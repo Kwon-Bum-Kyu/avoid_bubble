@@ -1,0 +1,185 @@
+{
+  "@@locale": "ko",
+  "start_title": "어보이드 버블",
+  "@start_title": {},
+  "start_subtitle": "날아오는 버블을 피해 최대한 오래 생존해 보세요!",
+  "@start_subtitle": {},
+  "start_best_time": "최고 기록: {time}초",
+  "@start_best_time": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "start_games_played": "총 게임 횟수: {count}회",
+  "@start_games_played": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "start_most_common_grade": "최다 등급: {grade}",
+  "@start_most_common_grade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "start_game": "게임 시작",
+  "@start_game": {},
+  "start_view_ranking": "랭킹 보기",
+  "@start_view_ranking": {},
+  "start_controls": "WASD / 방향키 - 이동 | R - 재시작 | ESC - 메인 메뉴",
+  "@start_controls": {},
+  "settings_title": "설정",
+  "@settings_title": {},
+  "settings_game_difficulty": "게임 난이도",
+  "@settings_game_difficulty": {},
+  "settings_bullet_speed": "총알 속도",
+  "@settings_bullet_speed": {},
+  "settings_player_speed": "플레이어 속도",
+  "@settings_player_speed": {},
+  "settings_invincible_mode": "무적 모드",
+  "@settings_invincible_mode": {},
+  "settings_pattern_timings": "패턴 타이밍",
+  "@settings_pattern_timings": {},
+  "settings_pattern1_start": "패턴 1 시작 시간",
+  "@settings_pattern1_start": {},
+  "settings_pattern2_start": "패턴 2 시작 시간",
+  "@settings_pattern2_start": {},
+  "settings_pattern3_start": "패턴 3 시작 시간",
+  "@settings_pattern3_start": {},
+  "settings_visual_audio": "비주얼 및 오디오",
+  "@settings_visual_audio": {},
+  "settings_show_hitboxes": "히트박스 표시",
+  "@settings_show_hitboxes": {},
+  "settings_hitbox_info": "히트박스 표시 여부",
+  "@settings_hitbox_info": {},
+  "settings_sound_effects": "소리 효과",
+  "@settings_sound_effects": {},
+  "settings_sound": "소리",
+  "@settings_sound": {},
+  "settings_build_info": "빌드 정보",
+  "@settings_build_info": {},
+  "settings_environment": "환경: {env}",
+  "@settings_environment": {
+    "placeholders": {
+      "env": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_dev_features_enabled": "개발자 기능 활성화",
+  "@settings_dev_features_enabled": {},
+  "settings_production_mode": "프로덕션 모드",
+  "@settings_production_mode": {},
+  "settings_debug_mode": "디버그 모드: {status}",
+  "@settings_debug_mode": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_reset_to_default": "기본값으로 리셋",
+  "@settings_reset_to_default": {},
+  "settings_save_settings": "설정 저장",
+  "@settings_save_settings": {},
+  "settings_hide_hitboxes": "히트박스 숨기기",
+  "@settings_hide_hitboxes": {},
+  "settings_show_hitboxes_toggle": "히트박스 표시",
+  "@settings_show_hitboxes_toggle": {},
+  "game_over_title": "😵 게임 오버",
+  "@game_over_title": {},
+  "game_over_survival_time": "⏱️ 생존 시간",
+  "@game_over_survival_time": {},
+  "game_over_time_unit": "🕰️ {time}초",
+  "@game_over_time_unit": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "game_over_grade": "🏅 등급: {grade}",
+  "@game_over_grade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "game_over_new_best_record": "🎉 새로운 최고 기록!",
+  "@game_over_new_best_record": {},
+  "game_over_current_rank": "🏆 현재 랭킹: {rank}위",
+  "@game_over_current_rank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "game_over_challenge_ranking": "🔥 랭킹 도전!",
+  "@game_over_challenge_ranking": {},
+  "game_over_register_nickname_prompt": "📝 랭킹에 도전하려면 닉네임 등록이 필요합니다",
+  "@game_over_register_nickname_prompt": {},
+  "game_over_register_nickname_button": "✍️ 닉네임 등록",
+  "@game_over_register_nickname_button": {},
+  "game_over_restart": "🔄 다시 시도",
+  "@game_over_restart": {},
+  "game_over_menu": "🏠 메뉴로",
+  "@game_over_menu": {},
+  "game_over_view_ranking": "🏆 랭킹 보기",
+  "@game_over_view_ranking": {},
+  "ranking_title": "🏆 랭킹",
+  "@ranking_title": {},
+  "ranking_load_failed": "⚠️ 랭킹 불러오기 실패",
+  "@ranking_load_failed": {},
+  "ranking_all": "🌍 전체 랭킹",
+  "@ranking_all": {},
+  "ranking_my_records": "📊 내 기록",
+  "@ranking_my_records": {},
+  "ranking_no_records": "💭 아직 기록이 없습니다",
+  "@ranking_no_records": {},
+  "ranking_refresh": "🔄 새로고침",
+  "@ranking_refresh": {},
+  "ranking_me": "🚀 나",
+  "@ranking_me": {},
+  "ranking_survival_time": "⏱️ 생존 시간: {time}초",
+  "@ranking_survival_time": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ranking_register_prompt": "📝 내 기록을 보려면 닉네임 등록이 필요합니다",
+  "@ranking_register_prompt": {},
+  "ranking_no_my_records": "💭 아직 내 기록이 없습니다",
+  "@ranking_no_my_records": {},
+  "ranking_best": "🎆 최고",
+  "@ranking_best": {},
+  "ranking_no_date": "📅 날짜 없음",
+  "@ranking_no_date": {},
+  "nickname_title": "닉네임 등록",
+  "@nickname_title": {},
+  "nickname_subtitle": "랭킹에 도전하실 닉네임을 입력해주세요",
+  "@nickname_subtitle": {},
+  "nickname_hint": "닉네임을 입력해주세요",
+  "@nickname_hint": {},
+  "nickname_rules": "• 2-10자 이내\n• 한글, 영문, 숫자 가능\n• 특수문자 사용 불가",
+  "@nickname_rules": {},
+  "nickname_later": "나중에",
+  "@nickname_later": {},
+  "nickname_register": "등록",
+  "@nickname_register": {},
+  "nickname_network_error": "네트워크 오류가 발생했습니다",
+  "@nickname_network_error": {},
+  "active": "활성",
+  "@active": {},
+  "inactive": "비활성",
+  "@inactive": {}
+}
