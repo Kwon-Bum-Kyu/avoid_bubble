@@ -6,7 +6,6 @@ import 'game/avoid_bubble_game.dart';
 import 'game/game_state.dart';
 import 'models/game_settings.dart';
 import 'models/game_stats.dart';
-import 'services/localization_service.dart';
 import 'screens/start_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
@@ -15,12 +14,10 @@ import 'config/environment_config.dart';
 import 'config/supabase_config.dart';
 import 'config/game_constants.dart';
 import 'services/audio_service.dart';
+import 'services/localization_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 브라우저 언어 감지 및 설정
-  LocalizationService.detectBrowserLanguage();
 
   // Flutter 프레임워크 오류 처리 (마우스 트래킹 등)
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -42,25 +39,18 @@ void main() async {
 
   // 웹 환경에서 안전한 orientation 처리 (itch.io 호환성)
   if (kIsWeb) {
+    // 웹에서는 강제 orientation 설정을 하지 않음 (itch.io 모바일 호환성)
     try {
-      // itch.io iframe 환경에서는 orientation 설정을 최소화
+      // 가능하면 landscape를 선호하지만 실패해도 무시
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
-      if (!kReleaseMode) debugPrint('✅ Orientation 설정 성공');
     } catch (e) {
-      // itch.io iframe에서는 orientation 제어가 제한되므로 무시
-      if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패 (itch.io 호환): $e');
-    }
-
-    // 웹에서 추가 안전 설정
-    try {
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    } catch (e) {
-      if (!kReleaseMode) debugPrint('⚠️ SystemUI 설정 실패 (itch.io 호환): $e');
+      // itch.io나 다른 환경에서 orientation 설정이 실패해도 계속 진행
+      if (!kReleaseMode) debugPrint('⚠️ Orientation 설정 실패 (무시됨): $e');
     }
   } else {
     // 네이티브 앱에서는 landscape 우선 설정
@@ -80,6 +70,10 @@ void main() async {
   try {
     // 환경 설정 초기화
     await EnvironmentConfig.initialize();
+    
+    // 다국어 서비스 초기화
+    LocalizationService.detectBrowserLanguage();
+    await LocalizationService.loadLanguage();
 
     if (kDebugMode) {
       // 초기화 후 환경 상태 확인
@@ -126,9 +120,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 현재 설정된 언어에 따라 앱 제목 결정
+    final appTitle = LocalizationService.currentLanguage == 'en' 
+        ? 'Avoid Bubble Game'
+        : '어보이드 버블 게임';
+    
+    // 기본 언어를 영어로 설정
+    final appLocale = LocalizationService.currentLanguage == 'en'
+        ? const Locale('en', 'US')
+        : const Locale('ko', 'KR');
+    
     return MaterialApp(
-      title: 'Avoid Bubble Game',
-      locale: const Locale('ko', 'KR'), // 기본 언어를 한국어로 설정
+      title: appTitle,
+      locale: appLocale,
       theme: ThemeData(fontFamily: 'NexonCart'),
       home: GameWrapper(isOfflineMode: isOfflineMode),
       debugShowCheckedModeBanner: false,

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
   <head>
     <!--
     If you are serving your web app in a path other than the root, change the
@@ -201,34 +201,9 @@
 
       // Flutter에서 호출
       window.gameLoadingComplete = function () {
-        console.log("🚀 Flutter 게임 로딩 완료");
         gameReady = true;
         checkGameReady();
       };
-
-      // itch.io 환경 디버깅을 위한 추가 정보
-      if (window.parent !== window) {
-        console.log("🔍 itch.io 환경 정보:");
-        console.log("   - User Agent:", navigator.userAgent);
-        console.log("   - Platform:", navigator.platform);
-        console.log("   - Language:", navigator.language);
-        console.log("   - Online:", navigator.onLine);
-        
-        // itch.io에서 필요한 권한 체크
-        setTimeout(function() {
-          console.log("⏰ 10초 후 게임 상태 체크...");
-          setTimeout(function() {
-            if (!flutterReady && !gameReady) {
-              console.error("❌ 게임 로딩 실패 - Flutter 초기화되지 않음");
-              console.log("💡 해결책: 브라우저 캐시 삭제 후 새로고침");
-            } else if (flutterReady && !gameReady) {
-              console.log("⚠️ Flutter는 로딩되었으나 게임 준비 안됨");
-            } else {
-              console.log("✅ 게임 정상 로딩 완료");
-            }
-          }, 10000);
-        }, 1000);
-      }
 
       // 모바일 디바이스 감지 함수
       window.isMobileDevice = function () {
@@ -249,17 +224,18 @@
       // 마우스 트래킹 오류 방지를 위한 전역 설정 (itch.io 호환성 개선)
       window.addEventListener("error", function (e) {
         // itch.io iframe에서 발생하는 일반적인 오류들 무시
-        if (e.message && (
-          e.message.includes("mouse_tracker") ||
-          e.message.includes("deviceUpdatePhase") ||
-          e.message.includes("_debugDuringDeviceUpdate") ||
-          e.message.includes("updateAllDevices") ||
-          e.message.includes("RenderObject") ||
-          e.message.includes("orientation") ||
-          e.message.includes("NotSupportedError") ||
-          e.message.includes("SecurityError") ||
-          e.message.includes("DOMException")
-        )) {
+        if (
+          e.message &&
+          (e.message.includes("mouse_tracker") ||
+            e.message.includes("deviceUpdatePhase") ||
+            e.message.includes("_debugDuringDeviceUpdate") ||
+            e.message.includes("updateAllDevices") ||
+            e.message.includes("RenderObject") ||
+            e.message.includes("orientation") ||
+            e.message.includes("NotSupportedError") ||
+            e.message.includes("SecurityError") ||
+            e.message.includes("DOMException"))
+        ) {
           e.preventDefault();
           return false;
         }
@@ -270,14 +246,16 @@
         if (e.reason && e.reason.toString) {
           const reasonStr = e.reason.toString().toLowerCase();
           // itch.io iframe에서 발생하는 일반적인 Promise rejection 무시
-          if (reasonStr.includes("mouse_tracker") ||
-              reasonStr.includes("deviceupdatephase") ||
-              reasonStr.includes("debugduringdeviceupdate") ||
-              reasonStr.includes("orientation") ||
-              reasonStr.includes("notsupported") ||
-              reasonStr.includes("securityerror") ||
-              reasonStr.includes("domexception") ||
-              reasonStr.includes("network")) {
+          if (
+            reasonStr.includes("mouse_tracker") ||
+            reasonStr.includes("deviceupdatephase") ||
+            reasonStr.includes("debugduringdeviceupdate") ||
+            reasonStr.includes("orientation") ||
+            reasonStr.includes("notsupported") ||
+            reasonStr.includes("securityerror") ||
+            reasonStr.includes("domexception") ||
+            reasonStr.includes("network")
+          ) {
             e.preventDefault();
             return false;
           }
@@ -286,11 +264,6 @@
 
       // iframe 환경에서의 마우스 이벤트 처리 개선
       if (window.parent !== window) {
-        // iframe 내부에서 실행 중 (itch.io 등)
-        console.log("🎮 itch.io iframe 환경에서 실행 중");
-        console.log("📱 Mobile Device:", window.IS_MOBILE_DEVICE);
-        console.log("🖥️ Screen Size:", window.innerWidth + "x" + window.innerHeight);
-        
         // itch.io iframe에서 안전한 설정
         try {
           document.addEventListener("mouseleave", function () {
@@ -315,15 +288,13 @@
             try {
               // Flutter에게 크기 변경 알림
               if (window.dispatchEvent) {
-                window.dispatchEvent(new Event('resize'));
+                window.dispatchEvent(new Event("resize"));
               }
             } catch (e) {
               // 리사이즈 이벤트 오류 무시
             }
           });
-        } catch (e) {
-          console.log("iframe 이벤트 설정 오류 (정상적인 동작)");
-        }
+        } catch (e) {}
       }
 
       // body 태그에 모바일 클래스 추가 (Flutter에서 CSS로 감지 가능)
@@ -334,17 +305,20 @@
         try {
           // itch.io iframe 환경에서는 orientation lock이 제한됨
           if (window.parent !== window) {
-            // iframe 환경 (itch.io 등)에서는 orientation lock을 시도하지 않음
-            console.log("iframe 환경에서는 화면 회전 잠금을 지원하지 않습니다");
-          } else if (screen.orientation && screen.orientation.lock && typeof screen.orientation.lock === 'function') {
+          } else if (
+            screen.orientation &&
+            screen.orientation.lock &&
+            typeof screen.orientation.lock === "function"
+          ) {
             // 일반 브라우저 환경에서만 시도
             screen.orientation.lock("landscape").catch(function (err) {
-              console.log("화면 회전 잠금 실패 (정상적인 동작):", err.message);
+              console.error(
+                "화면 회전 잠금 실패 (정상적인 동작):",
+                err.message
+              );
             });
           }
-        } catch (e) {
-          console.log("화면 회전 API 사용 불가 (정상적인 동작)");
-        }
+        } catch (e) {}
 
         // 화면 회전 감지 및 알림 (itch.io 호환성 개선)
         window.addEventListener("orientationchange", function () {
@@ -352,51 +326,60 @@
             try {
               const orientation = screen.orientation
                 ? screen.orientation.angle
-                : (typeof window.orientation !== 'undefined' ? window.orientation : 0);
+                : typeof window.orientation !== "undefined"
+                ? window.orientation
+                : 0;
 
-              // 세로 방향일 때만 알림 표시 (iframe이 아닌 경우만)
-              if (window.parent === window && Math.abs(orientation) !== 90) {
+              // 세로 방향일 때 알림 표시 (모바일에서는 iframe 여부와 관계없이)
+              if (Math.abs(orientation) !== 90) {
                 showOrientationMessage();
               } else {
                 hideOrientationMessage();
               }
-            } catch (e) {
-              // 오류 발생 시 조용히 무시
-              console.log("화면 회전 감지 오류 (정상적인 동작)");
-            }
+            } catch (e) {}
           }, 100);
         });
 
-        // 초기 방향 체크 (iframe이 아닌 경우만)
-        if (window.parent === window) {
-          setTimeout(function () {
-            try {
-              const orientation = screen.orientation
-                ? screen.orientation.angle
-                : (typeof window.orientation !== 'undefined' ? window.orientation : 0);
-              if (Math.abs(orientation) !== 90) {
-                showOrientationMessage();
-              }
-            } catch (e) {
-              console.log("초기 화면 회전 체크 오류 (정상적인 동작)");
+        // 초기 방향 체크 (모바일에서는 iframe 여부와 관계없이)
+        setTimeout(function () {
+          try {
+            const orientation = screen.orientation
+              ? screen.orientation.angle
+              : typeof window.orientation !== "undefined"
+              ? window.orientation
+              : 0;
+            if (Math.abs(orientation) !== 90) {
+              showOrientationMessage();
             }
-          }, 1000);
-        }
+          } catch (e) {
+            // 오류 발생 시 기본적으로 메시지 표시 (모바일일 가능성)
+            showOrientationMessage();
+          }
+        }, 1000);
       } else {
         document.body.classList.add("desktop-device");
       }
 
-      // 방향 알림 메시지 표시
+      // 방향 알림 메시지 표시 (다국어 지원)
       function showOrientationMessage() {
         let orientationMsg = document.getElementById("orientation-message");
         if (!orientationMsg) {
+          // 브라우저 언어 감지
+          const isEnglish = navigator.language.toLowerCase().startsWith("en");
+          const title = isEnglish
+            ? "Please rotate your screen"
+            : "화면을 회전해주세요";
+          const subtitle = isEnglish
+            ? "Please play in landscape mode for better gaming experience"
+            : "더 나은 게임 경험을 위해 가로 모드로 플레이해주세요";
+
           orientationMsg = document.createElement("div");
           orientationMsg.id = "orientation-message";
           orientationMsg.innerHTML = `
             <div style="text-align: center; color: white; font-family: Arial, sans-serif;">
               <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
-              <div style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">화면을 회전해주세요</div>
-              <div style="font-size: 16px; opacity: 0.8;">더 나은 게임 경험을 위해 가로 모드로 플레이해주세요</div>
+              <div style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">${title}</div>
+              <div style="font-size: 16px; opacity: 0.8;">${subtitle}</div>
             </div>
           `;
           orientationMsg.style.cssText = `

@@ -1,0 +1,310 @@
+{
+  "@@locale": "en",
+  
+  "start_title": "Avoid Bubble",
+  "@start_title": {
+    "description": "Title of the start screen"
+  },
+  "start_subtitle": "Avoid flying bubbles and survive as long as you can!",
+  "@start_subtitle": {
+    "description": "Subtitle describing the game"
+  },
+  "start_best_time": "Best Time: {time}s",
+  "@start_best_time": {
+    "description": "Shows the best survival time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "start_games_played": "Games Played: {count} times",
+  "@start_games_played": {
+    "description": "Shows total games played",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "start_most_common_grade": "Most Common Grade: {grade}",
+  "@start_most_common_grade": {
+    "description": "Shows the most frequently achieved grade",
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "start_game": "Start Game",
+  "@start_game": {
+    "description": "Button to start the game"
+  },
+  "start_view_ranking": "View Ranking",
+  "@start_view_ranking": {
+    "description": "Button to view ranking"
+  },
+  "start_controls": "WASD / Arrow Keys - Move | R - Restart | ESC - Main Menu",
+  "@start_controls": {
+    "description": "Game controls instruction"
+  },
+
+  "settings_title": "Settings",
+  "@settings_title": {
+    "description": "Title of the settings screen"
+  },
+  "settings_game_difficulty": "Game Difficulty",
+  "@settings_game_difficulty": {
+    "description": "Game difficulty section header"
+  },
+  "settings_bullet_speed": "Bullet Speed",
+  "@settings_bullet_speed": {
+    "description": "Bullet speed setting"
+  },
+  "settings_player_speed": "Player Speed",
+  "@settings_player_speed": {
+    "description": "Player movement speed setting"
+  },
+  "settings_invincible_mode": "Invincible Mode",
+  "@settings_invincible_mode": {
+    "description": "Invincible mode toggle"
+  },
+  "settings_pattern_timings": "Pattern Timings",
+  "@settings_pattern_timings": {
+    "description": "Pattern timing settings section"
+  },
+  "settings_pattern1_start": "Pattern 1 Start Time",
+  "@settings_pattern1_start": {
+    "description": "When pattern 1 starts"
+  },
+  "settings_pattern2_start": "Pattern 2 Start Time",
+  "@settings_pattern2_start": {
+    "description": "When pattern 2 starts"
+  },
+  "settings_pattern3_start": "Pattern 3 Start Time",
+  "@settings_pattern3_start": {
+    "description": "When pattern 3 starts"
+  },
+  "settings_visual_audio": "Visual & Audio",
+  "@settings_visual_audio": {
+    "description": "Visual and audio settings section"
+  },
+  "settings_show_hitboxes": "Show Hitboxes",
+  "@settings_show_hitboxes": {
+    "description": "Toggle hitbox visibility"
+  },
+  "settings_hitbox_info": "Toggle hitbox visibility",
+  "@settings_hitbox_info": {
+    "description": "Hitbox toggle information"
+  },
+  "settings_sound_effects": "Sound Effects",
+  "@settings_sound_effects": {
+    "description": "Sound effects toggle"
+  },
+  "settings_sound": "Sound",
+  "@settings_sound": {
+    "description": "Sound volume setting"
+  },
+  "settings_build_info": "Build Info",
+  "@settings_build_info": {
+    "description": "Build information section"
+  },
+  "settings_environment": "Environment: {env}",
+  "@settings_environment": {
+    "description": "Development environment info",
+    "placeholders": {
+      "env": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_dev_features_enabled": "Developer Features Enabled",
+  "@settings_dev_features_enabled": {
+    "description": "Developer mode enabled status"
+  },
+  "settings_production_mode": "Production Mode",
+  "@settings_production_mode": {
+    "description": "Production mode status"
+  },
+  "settings_debug_mode": "Debug Mode: {status}",
+  "@settings_debug_mode": {
+    "description": "Debug mode status",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_reset_to_default": "Reset to Default",
+  "@settings_reset_to_default": {
+    "description": "Reset settings to default button"
+  },
+  "settings_save_settings": "Save Settings",
+  "@settings_save_settings": {
+    "description": "Save settings button"
+  },
+  "settings_hide_hitboxes": "Hide Hitboxes",
+  "@settings_hide_hitboxes": {
+    "description": "Hide hitboxes toggle"
+  },
+  "settings_show_hitboxes_toggle": "Show Hitboxes",
+  "@settings_show_hitboxes_toggle": {
+    "description": "Show hitboxes toggle"
+  },
+
+  "game_over_title": "😵 Game Over",
+  "@game_over_title": {
+    "description": "Game over screen title"
+  },
+  "game_over_survival_time": "⏱️ Survival Time",
+  "@game_over_survival_time": {
+    "description": "Survival time label"
+  },
+  "game_over_time_unit": "🕰️ {time}s",
+  "@game_over_time_unit": {
+    "description": "Time unit display",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "game_over_grade": "🏅 Grade: {grade}",
+  "@game_over_grade": {
+    "description": "Player grade display",
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "game_over_new_best_record": "🎉 New Best Record!",
+  "@game_over_new_best_record": {
+    "description": "New best record achievement message"
+  },
+  "game_over_current_rank": "🏆 Current Rank: #{rank}",
+  "@game_over_current_rank": {
+    "description": "Current ranking display",
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "game_over_challenge_ranking": "🔥 Challenge Ranking!",
+  "@game_over_challenge_ranking": {
+    "description": "Challenge ranking message"
+  },
+  "game_over_register_nickname_prompt": "📝 Nickname registration required to challenge ranking",
+  "@game_over_register_nickname_prompt": {
+    "description": "Prompt to register nickname for ranking"
+  },
+  "game_over_register_nickname_button": "✍️ Register Nickname",
+  "@game_over_register_nickname_button": {
+    "description": "Register nickname button"
+  },
+  "game_over_restart": "🔄 Try Again",
+  "@game_over_restart": {
+    "description": "Restart game button"
+  },
+  "game_over_menu": "🏠 Main Menu",
+  "@game_over_menu": {
+    "description": "Return to main menu button"
+  },
+  "game_over_view_ranking": "🏆 View Ranking",
+  "@game_over_view_ranking": {
+    "description": "View ranking button"
+  },
+
+  "ranking_title": "🏆 Ranking",
+  "@ranking_title": {
+    "description": "Ranking screen title"
+  },
+  "ranking_load_failed": "⚠️ Failed to load ranking",
+  "@ranking_load_failed": {
+    "description": "Ranking load failure message"
+  },
+  "ranking_all": "🌍 All Rankings",
+  "@ranking_all": {
+    "description": "All rankings tab"
+  },
+  "ranking_my_records": "📊 My Records",
+  "@ranking_my_records": {
+    "description": "Personal records tab"
+  },
+  "ranking_no_records": "💭 No records yet",
+  "@ranking_no_records": {
+    "description": "No records available message"
+  },
+  "ranking_refresh": "🔄 Refresh",
+  "@ranking_refresh": {
+    "description": "Refresh ranking button"
+  },
+  "ranking_me": "🚀 Me",
+  "@ranking_me": {
+    "description": "Player indicator in ranking"
+  },
+  "ranking_survival_time": "⏱️ Survival Time: {time}s",
+  "@ranking_survival_time": {
+    "description": "Survival time in ranking",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ranking_register_prompt": "📝 Nickname registration required to view your records",
+  "@ranking_register_prompt": {
+    "description": "Prompt to register nickname for personal records"
+  },
+  "ranking_no_my_records": "💭 No personal records yet",
+  "@ranking_no_my_records": {
+    "description": "No personal records message"
+  },
+  "ranking_best": "🎆 Best",
+  "@ranking_best": {
+    "description": "Best record indicator"
+  },
+  "ranking_no_date": "📅 No Date",
+  "@ranking_no_date": {
+    "description": "No date available"
+  },
+
+  "nickname_title": "Register Nickname",
+  "@nickname_title": {
+    "description": "Nickname registration screen title"
+  },
+  "nickname_subtitle": "Enter your nickname to challenge the ranking",
+  "@nickname_subtitle": {
+    "description": "Nickname registration subtitle"
+  },
+  "nickname_hint": "Enter your nickname",
+  "@nickname_hint": {
+    "description": "Nickname input placeholder"
+  },
+  "nickname_rules": "• 2-10 characters\n• Korean, English, numbers allowed\n• No special characters",
+  "@nickname_rules": {
+    "description": "Nickname validation rules"
+  },
+  "nickname_later": "Later",
+  "@nickname_later": {
+    "description": "Skip nickname registration button"
+  },
+  "nickname_register": "Register",
+  "@nickname_register": {
+    "description": "Register nickname button"
+  },
+  "nickname_network_error": "A network error occurred",
+  "@nickname_network_error": {
+    "description": "Network error message"
+  },
+
+  "active": "Active",
+  "@active": {
+    "description": "Active status"
+  },
+  "inactive": "Inactive",
+  "@inactive": {
+    "description": "Inactive status"
+  }
+}
