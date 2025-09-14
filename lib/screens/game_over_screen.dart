@@ -96,11 +96,11 @@ class _GameOverScreenState extends State<GameOverScreen> {
   }
 
   String _getScoreGrade(double time) {
-    if (time >= 60) return 'S';
-    if (time >= 45) return 'A';
-    if (time >= 30) return 'B';
-    if (time >= 15) return 'C';
-    if (time >= 5) return 'D';
+    if (time >= 300) return 'S';
+    if (time >= 200) return 'A';
+    if (time >= 150) return 'B';
+    if (time >= 100) return 'C';
+    if (time >= 50) return 'D';
     return 'F';
   }
 
