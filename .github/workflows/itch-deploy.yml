@@ -2,7 +2,6 @@ name: Deploy to itch.io
 
 on:
   push:
-    branches: [main]
     tags:
       - "v*.*.*"
   workflow_dispatch:
@@ -19,6 +18,126 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Analyze tag and update pubspec.yaml
+        id: analyze_tag
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # 태그에서 버전 추출
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Tag version: $TAG_VERSION"
+            
+            # 현재 pubspec.yaml의 버전 확인
+            CURRENT_VERSION=$(grep "^version:" pubspec.yaml | cut -d' ' -f2)
+            echo "Current pubspec version: $CURRENT_VERSION"
+            
+            # Semantic version 검증 (major.minor.patch 형태)
+            if [[ ! $TAG_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Invalid semantic version format: $TAG_VERSION"
+              echo "   Expected format: major.minor.patch (e.g., 1.2.3)"
+              exit 1
+            fi
+            
+            # 버전이 다르면 pubspec.yaml 업데이트
+            if [ "$TAG_VERSION" != "$CURRENT_VERSION" ]; then
+              echo "🔄 Updating pubspec.yaml from $CURRENT_VERSION to $TAG_VERSION"
+              sed -i "s/^version: $CURRENT_VERSION/version: $TAG_VERSION/" pubspec.yaml
+              
+              # Git 설정
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              
+              # 변경사항 커밋 및 태그로 푸시
+              git add pubspec.yaml
+              git commit -m "chore: update pubspec.yaml version to $TAG_VERSION
+
+              - Automated version sync from tag v$TAG_VERSION
+              - Updated by GitHub Actions workflow"
+              
+              # 태그가 아닌 main 브랜치로 푸시
+              git push origin HEAD:main
+              
+              echo "✅ pubspec.yaml updated and pushed to main branch"
+            else
+              echo "✅ pubspec.yaml version already matches tag version"
+            fi
+            
+            # 버전 타입 분석 (major.minor.patch)
+            IFS='.' read -ra VERSION_PARTS <<< "$TAG_VERSION"
+            MAJOR=${VERSION_PARTS[0]}
+            MINOR=${VERSION_PARTS[1]}
+            PATCH=${VERSION_PARTS[2]}
+            
+            # 이전 태그와 비교하여 변경 타입 결정
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+            if [ -n "$PREV_TAG" ]; then
+              PREV_VERSION=${PREV_TAG#v}
+              IFS='.' read -ra PREV_PARTS <<< "$PREV_VERSION"
+              PREV_MAJOR=${PREV_PARTS[0]}
+              PREV_MINOR=${PREV_PARTS[1]}
+              PREV_PATCH=${PREV_PARTS[2]}
+              
+              if [ "$MAJOR" -gt "$PREV_MAJOR" ]; then
+                VERSION_TYPE="major"
+              elif [ "$MINOR" -gt "$PREV_MINOR" ]; then
+                VERSION_TYPE="minor"
+              elif [ "$PATCH" -gt "$PREV_PATCH" ]; then
+                VERSION_TYPE="patch"
+              else
+                VERSION_TYPE="unknown"
+              fi
+            else
+              VERSION_TYPE="initial"
+            fi
+            
+            echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
+            echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+            echo "major=$MAJOR" >> $GITHUB_OUTPUT
+            echo "minor=$MINOR" >> $GITHUB_OUTPUT
+            echo "patch=$PATCH" >> $GITHUB_OUTPUT
+            echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
+            
+            echo "📊 Version Analysis:"
+            echo "  Current: $TAG_VERSION"
+            echo "  Previous: $PREV_VERSION"
+            echo "  Type: $VERSION_TYPE"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            # Manual workflow dispatch with version
+            MANUAL_VERSION="${{ github.event.inputs.version }}"
+            
+            # Remove 'v' prefix if present
+            if [[ $MANUAL_VERSION == v* ]]; then
+              MANUAL_VERSION=${MANUAL_VERSION#v}
+            fi
+            
+            echo "Manual deployment version: $MANUAL_VERSION"
+            
+            # Semantic version 검증
+            if [[ ! $MANUAL_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Invalid semantic version format: $MANUAL_VERSION"
+              echo "   Expected format: major.minor.patch (e.g., 1.2.3)"
+              exit 1
+            fi
+            
+            # 버전 타입 분석
+            IFS='.' read -ra VERSION_PARTS <<< "$MANUAL_VERSION"
+            MAJOR=${VERSION_PARTS[0]}
+            MINOR=${VERSION_PARTS[1]}
+            PATCH=${VERSION_PARTS[2]}
+            
+            echo "version=$MANUAL_VERSION" >> $GITHUB_OUTPUT
+            echo "version_type=manual" >> $GITHUB_OUTPUT
+            echo "major=$MAJOR" >> $GITHUB_OUTPUT
+            echo "minor=$MINOR" >> $GITHUB_OUTPUT
+            echo "patch=$PATCH" >> $GITHUB_OUTPUT
+            echo "prev_version=" >> $GITHUB_OUTPUT
+          else
+            echo "❌ This workflow should only run on version tags or manual dispatch with version"
+            exit 1
+          fi
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -58,21 +177,19 @@ jobs:
       - name: Verify Butler installation
         run: butler -V
 
-      - name: Set version number
-        id: version
+      - name: Set deployment version
+        id: deployment_version
         run: |
-          if [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            # Tagged release
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [ "${{ github.event.inputs.version }}" != "" ]; then
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
             # Manual workflow with version input
             VERSION="${{ github.event.inputs.version }}"
+            echo "Using manual version: $VERSION"
           else
-            # Auto-generated version from commit
-            VERSION="build-$(date +'%Y%m%d-%H%M')-${GITHUB_SHA:0:7}"
+            # Use analyzed tag version
+            VERSION="v${{ steps.analyze_tag.outputs.version }}"
+            echo "Using tag version: $VERSION"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Building version: $VERSION"
 
       - name: Deploy to itch.io
         env:
@@ -80,25 +197,28 @@ jobs:
           ITCH_USER: ${{ secrets.ITCH_USER }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
         run: |
-          butler push build/web $ITCH_USER/$ITCH_GAME:web --userversion "${{ steps.version.outputs.version }}"
+          butler push build/web $ITCH_USER/$ITCH_GAME:web --userversion "${{ steps.deployment_version.outputs.version }}"
 
       - name: Create deployment summary
         run: |
-          echo "## 🚀 itch.io 자동 배포 완료" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 itch.io 태그 기반 자동 배포 완료" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📊 배포 정보" >> $GITHUB_STEP_SUMMARY
           echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
           echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🎮 게임 | \`${{ secrets.ITCH_USER }}/${{ secrets.ITCH_GAME }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 버전 | \`${{ steps.version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 버전 | \`${{ steps.deployment_version.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏷️ 버전 타입 | \`${{ steps.analyze_tag.outputs.version_type }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📈 이전 버전 | \`${{ steps.analyze_tag.outputs.prev_version }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 🕒 배포 시간 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "| 📝 커밋 | \`${GITHUB_SHA:0:7}\` |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🎯 게임 기능" >> $GITHUB_STEP_SUMMARY
-          echo -e "$FEATURES" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔢 Semantic Versioning" >> $GITHUB_STEP_SUMMARY
+          echo "- **Major**: ${{ steps.analyze_tag.outputs.major }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Minor**: ${{ steps.analyze_tag.outputs.minor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Patch**: ${{ steps.analyze_tag.outputs.patch }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🎮 플레이 링크" >> $GITHUB_STEP_SUMMARY
-          echo "**👉 [지금 플레이하기](https://${{ secrets.ITCH_USER }}.itch.io/${{ secrets.ITCH_GAME }})**" >> $GITHUB_STEP_SUMMARY
+          echo "**👉 [지금 플레이하기](https://dev-kbk.itch.io/avoid-bubble)**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "*🤖 GitHub Actions로 자동 빌드 및 배포됨*" >> $GITHUB_STEP_SUMMARY
+          echo "*🏷️ 태그 기반 자동 배포 | 🤖 GitHub Actions*" >> $GITHUB_STEP_SUMMARY

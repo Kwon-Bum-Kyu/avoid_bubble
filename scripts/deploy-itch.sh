@@ -62,9 +62,16 @@ else
     echo "⚠️  itch.io 호환성 설정을 확인할 수 없습니다."
 fi
 
-# 타임스탬프 생성
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-ZIP_NAME="avoid-bubble-itch-${TIMESTAMP}.zip"
+# pubspec.yaml에서 버전 추출
+echo "📋 pubspec.yaml에서 버전 정보 추출..."
+VERSION=$(grep "^version:" pubspec.yaml | cut -d' ' -f2)
+if [ -z "$VERSION" ]; then
+    echo "❌ pubspec.yaml에서 버전을 찾을 수 없습니다."
+    exit 1
+fi
+
+echo "🏷️  현재 버전: $VERSION"
+ZIP_NAME="avoid-bubble-itch-v${VERSION}.zip"
 
 # 기존 itch 배포 zip 파일들 정리
 echo "🗑️ 기존 itch 배포 파일 정리..."
@@ -92,5 +99,5 @@ echo "   3. ${ZIP_NAME} 파일 업로드"
 echo "   4. 'This file will be played in the browser' 선택"
 echo ""
 echo "🤖 Butler 자동 업로드:"
-echo "   butler push build/web username/game:web --userversion \"${TIMESTAMP}\""
+echo "   butler push build/web username/game:web --userversion \"${VERSION}\""
 echo ""

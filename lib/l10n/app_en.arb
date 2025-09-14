@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  
   "start_title": "Avoid Bubble",
   "@start_title": {
     "description": "Title of the start screen"
@@ -48,7 +47,6 @@
   "@start_controls": {
     "description": "Game controls instruction"
   },
-
   "settings_title": "Settings",
   "@settings_title": {
     "description": "Title of the settings screen"
@@ -151,7 +149,6 @@
   "@settings_show_hitboxes_toggle": {
     "description": "Show hitboxes toggle"
   },
-
   "game_over_title": "😵 Game Over",
   "@game_over_title": {
     "description": "Game over screen title"
@@ -215,7 +212,6 @@
   "@game_over_view_ranking": {
     "description": "View ranking button"
   },
-
   "ranking_title": "🏆 Ranking",
   "@ranking_title": {
     "description": "Ranking screen title"
@@ -236,7 +232,7 @@
   "@ranking_no_records": {
     "description": "No records available message"
   },
-  "ranking_refresh": "🔄 Refresh",
+  "ranking_refresh": "Refresh",
   "@ranking_refresh": {
     "description": "Refresh ranking button"
   },
@@ -269,7 +265,6 @@
   "@ranking_no_date": {
     "description": "No date available"
   },
-
   "nickname_title": "Register Nickname",
   "@nickname_title": {
     "description": "Nickname registration screen title"
@@ -298,7 +293,6 @@
   "@nickname_network_error": {
     "description": "Network error message"
   },
-
   "active": "Active",
   "@active": {
     "description": "Active status"
