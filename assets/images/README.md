@@ -5,3 +5,5 @@
 - Background Assets From [craftpix](https://craftpix.net/file-licenses/)
 
 - Charactor Assets From [elthen](https://elthen.itch.io/2d-pixel-art-fire-elemental)
+
+- BGM Assets From [brevynmusic](https://brevynmusic.itch.io/short-circuits-energetic-8-bit)
