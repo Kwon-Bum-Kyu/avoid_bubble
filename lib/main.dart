@@ -32,7 +32,7 @@ void main() async {
       }
       return;
     }
-    
+
     // 기타 중요한 오류는 로그
     FlutterError.presentError(details);
   };
@@ -70,7 +70,7 @@ void main() async {
   try {
     // 환경 설정 초기화
     await EnvironmentConfig.initialize();
-    
+
     // 다국어 서비스 초기화
     LocalizationService.detectBrowserLanguage();
     await LocalizationService.loadLanguage();
@@ -121,15 +121,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 현재 설정된 언어에 따라 앱 제목 결정
-    final appTitle = LocalizationService.currentLanguage == 'en' 
-        ? 'Avoid Bubble Game'
-        : '어보이드 버블 게임';
-    
+    final appTitle = LocalizationService.currentLanguage == 'en'
+        ? 'Avoid Bubble'
+        : '어보이드 버블';
+
     // 기본 언어를 영어로 설정
     final appLocale = LocalizationService.currentLanguage == 'en'
         ? const Locale('en', 'US')
         : const Locale('ko', 'KR');
-    
+
     return MaterialApp(
       title: appTitle,
       locale: appLocale,
