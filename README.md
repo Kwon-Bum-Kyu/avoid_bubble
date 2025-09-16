@@ -17,7 +17,7 @@ A cross-platform bullet hell survival game built with Flutter and Flame engine. 
 
 ### Controls
 
-- **Movement**: WASD keys or Arrow keys (keyboard) / Touch controls (mobile)
+- **Movement**: WASD keys or Arrow keys (keyboard) / Joystick controls (mobile)
 - **Restart**: R key (during game or after game over)
 - **Menu**: ESC key
 
@@ -218,7 +218,7 @@ dart format lib/
 
 ### Mobile
 
-- Joystick-keyboard input conflict on mobile devices (use joystick only when available)
+- Joystick-keyboard input conflict on mobile devices (joystick mode automatically activated on mobile)
 
 ### Development
 
