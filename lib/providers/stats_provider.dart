@@ -51,7 +51,7 @@ class StatsProvider extends ChangeNotifier {
   String getFormattedBestTime() {
     final minutes = (bestTime / 60).floor();
     final seconds = (bestTime % 60).floor();
-    return '${minutes}분 ${seconds}초';
+    return '$minutes분 $seconds초';
   }
 
   // 총 플레이 시간 포맷팅
@@ -60,9 +60,9 @@ class StatsProvider extends ChangeNotifier {
     final minutes = ((totalPlayTime % 3600) / 60).floor();
 
     if (hours > 0) {
-      return '${hours}시간 ${minutes}분';
+      return '$hours시간 $minutes분';
     } else {
-      return '${minutes}분';
+      return '$minutes분';
     }
   }
 
@@ -70,7 +70,7 @@ class StatsProvider extends ChangeNotifier {
   String getFormattedAveragePlayTime() {
     final minutes = (averagePlayTime / 60).floor();
     final seconds = (averagePlayTime % 60).floor();
-    return '${minutes}분 ${seconds}초';
+    return '$minutes분 $seconds초';
   }
 
   // 등급별 통계 요약
@@ -116,7 +116,7 @@ class StatsProvider extends ChangeNotifier {
     final minutes = (needed / 60).floor();
     final seconds = (needed % 60).floor();
 
-    return '${targetGrade}등급까지 ${minutes}분 ${seconds}초';
+    return '$targetGrade등급까지 $minutes분 $seconds초';
   }
 
   // 통계 업데이트 (외부에서 직접 업데이트)
