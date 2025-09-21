@@ -2,10 +2,10 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'game/avoid_bubble_game.dart';
 import 'game/game_state.dart';
 import 'models/game_settings.dart';
-import 'models/game_stats.dart';
 import 'screens/start_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
@@ -15,6 +15,8 @@ import 'config/supabase_config.dart';
 import 'config/game_constants.dart';
 import 'services/audio_service.dart';
 import 'services/localization_service.dart';
+import 'providers/settings_provider.dart';
+import 'providers/stats_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,12 +132,18 @@ class MyApp extends StatelessWidget {
         ? const Locale('en', 'US')
         : const Locale('ko', 'KR');
 
-    return MaterialApp(
-      title: appTitle,
-      locale: appLocale,
-      theme: ThemeData(fontFamily: 'NexonCart'),
-      home: GameWrapper(isOfflineMode: isOfflineMode),
-      debugShowCheckedModeBanner: false,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SettingsProvider()),
+        ChangeNotifierProvider(create: (context) => StatsProvider()),
+      ],
+      child: MaterialApp(
+        title: appTitle,
+        locale: appLocale,
+        theme: ThemeData(fontFamily: 'NexonCart'),
+        home: GameWrapper(isOfflineMode: isOfflineMode),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
@@ -152,8 +160,6 @@ class GameWrapper extends StatefulWidget {
 class GameWrapperState extends State<GameWrapper> {
   GameState _currentState = GameState.startScreen;
   late AvoidBubbleGame game;
-  GameSettings _settings = GameSettings.defaultSettings();
-  GameStats? _stats;
   bool _isLoading = true;
 
   @override
@@ -164,7 +170,13 @@ class GameWrapperState extends State<GameWrapper> {
 
   Future<void> _initializeGame() async {
     try {
-      await _loadStats();
+      // Provider들 초기화
+      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+      final statsProvider = Provider.of<StatsProvider>(context, listen: false);
+
+      await settingsProvider.initialize();
+      await statsProvider.initialize();
+
       _createNewGame();
 
       setState(() {
@@ -196,12 +208,6 @@ class GameWrapperState extends State<GameWrapper> {
     }
   }
 
-  Future<void> _loadStats() async {
-    final stats = await GameStats.load();
-    setState(() {
-      _stats = stats;
-    });
-  }
 
   @override
   void dispose() {
@@ -211,7 +217,8 @@ class GameWrapperState extends State<GameWrapper> {
   }
 
   void _createNewGame() {
-    game = AvoidBubbleGame(settings: _settings);
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+    game = AvoidBubbleGame(settings: settingsProvider.currentSettings);
     game.onGameOver = _showGameOver;
   }
 
@@ -225,8 +232,10 @@ class GameWrapperState extends State<GameWrapper> {
   }
 
   void _showGameOver() {
-    _stats?.recordGame(game.survivalTime, 'F',
-        0); // Grade and bullets avoided are not implemented yet
+    // StatsProvider를 통해 게임 결과 기록
+    final statsProvider = Provider.of<StatsProvider>(context, listen: false);
+    statsProvider.recordGame(game.survivalTime, 'F', 0); // Grade and bullets avoided are not implemented yet
+
     setState(() {
       _currentState = GameState.gameOver;
     });
@@ -251,8 +260,10 @@ class GameWrapperState extends State<GameWrapper> {
   }
 
   void _updateSettings(GameSettings newSettings) {
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+    settingsProvider.saveSettings(newSettings);
+
     setState(() {
-      _settings = newSettings;
       // 오디오 설정 업데이트
       AudioService.instance.updateSettings(newSettings);
       _createNewGame(); // Recreate game with new settings
@@ -280,7 +291,7 @@ class GameWrapperState extends State<GameWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading || _stats == null) {
+    if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF1a1a1a),
         body: Center(
@@ -307,17 +318,25 @@ class GameWrapperState extends State<GameWrapper> {
 
     switch (_currentState) {
       case GameState.startScreen:
-        return StartScreen(
-          onStartGame: _startGame,
-          onShowSettings: _showSettings,
-          onShowRanking: _showRanking,
-          stats: _stats!,
+        return Consumer<StatsProvider>(
+          builder: (context, statsProvider, child) {
+            return StartScreen(
+              onStartGame: _startGame,
+              onShowSettings: _showSettings,
+              onShowRanking: _showRanking,
+              stats: statsProvider.currentStats,
+            );
+          },
         );
       case GameState.settings:
-        return SettingsScreen(
-          settings: _settings,
-          onSettingsChanged: _updateSettings,
-          onBack: _backToStart,
+        return Consumer<SettingsProvider>(
+          builder: (context, settingsProvider, child) {
+            return SettingsScreen(
+              settings: settingsProvider.currentSettings,
+              onSettingsChanged: _updateSettings,
+              onBack: _backToStart,
+            );
+          },
         );
       case GameState.playing:
         return GameScreen(
